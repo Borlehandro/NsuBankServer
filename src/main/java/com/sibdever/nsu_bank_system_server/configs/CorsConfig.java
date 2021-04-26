@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server;
+package com.sibdever.nsu_bank_system_server.configs;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

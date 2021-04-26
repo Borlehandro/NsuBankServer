@@ -1,27 +1,27 @@
-package com.sibdever.nsu_bank_system_server.user;
+package com.sibdever.nsu_bank_system_server.operator;
 
 import javax.persistence.*;
 
 @Entity
-@Table(name = "users_list")
-public class User {
+@Table(name = "operators")
+public class Operator {
     @Id
     @GeneratedValue
     int id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(name = "full_name")
+    @Column(nullable = false)
     private String fullName;
 
-    @Column(name = "password_hash")
+    @Column(name = "password_hash", nullable = false)
     // TODO Use password hashing from security
     private String password;
 
-    public User(){}
+    public Operator(){}
 
-    public User(String username, String fullName, String password) {
+    public Operator(String username, String fullName, String password) {
         this.username = username;
         this.fullName = fullName;
         this.password = password;

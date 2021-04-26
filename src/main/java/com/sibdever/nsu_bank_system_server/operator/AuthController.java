@@ -1,10 +1,7 @@
-package com.sibdever.nsu_bank_system_server.user;
+package com.sibdever.nsu_bank_system_server.operator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/auth")
@@ -17,10 +14,10 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/register")
+    @PostMapping("/login")
     // TODO Return JWT (Use security)
-    public void register(HttpServletResponse response, HttpServletRequest request, @RequestBody UserCredentials userCredentials) throws WrongCredentialsException {
-        authService.register(userCredentials);
+    public void register(@RequestBody OperatorCredentials operatorCredentials) throws WrongCredentialsException {
+        authService.login(operatorCredentials);
     }
 
     @GetMapping("/test")

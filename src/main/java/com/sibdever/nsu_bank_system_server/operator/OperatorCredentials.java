@@ -1,6 +1,6 @@
-package com.sibdever.nsu_bank_system_server.user;
+package com.sibdever.nsu_bank_system_server.operator;
 
-public class UserCredentials {
+public class OperatorCredentials {
     private String username;
     private String fullName;
     private String password;

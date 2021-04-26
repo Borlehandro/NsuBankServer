@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.user;
+package com.sibdever.nsu_bank_system_server.operator;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
