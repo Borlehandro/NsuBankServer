@@ -1,5 +1,7 @@
-package com.sibdever.nsu_bank_system_server.operator;
+package com.sibdever.nsu_bank_system_server.auth;
 
+import com.sibdever.nsu_bank_system_server.operator.OperatorCredentials;
+import com.sibdever.nsu_bank_system_server.operator.OperatorsRepository;
 import org.springframework.stereotype.Service;
 
 @Service
