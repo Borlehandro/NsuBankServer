@@ -24,7 +24,7 @@ public class Operator {
     private OperatorRole role;
 
     @ElementCollection(targetClass = OperatorAuthority.class, fetch = FetchType.EAGER)
-    @JoinTable(name = "users_authorities", joinColumns = @JoinColumn(name = "id"))
+    @CollectionTable(name = "operator_authorities", joinColumns = @JoinColumn(name = "operator_id"))
     @Column(name = "authority", nullable = false)
     @Enumerated(EnumType.STRING)
     private List<OperatorAuthority> userAuthorities;
