@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.data.model;
+package com.sibdever.nsu_bank_system_server.data.model.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

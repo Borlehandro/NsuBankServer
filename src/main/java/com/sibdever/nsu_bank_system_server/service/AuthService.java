@@ -1,7 +1,7 @@
 package com.sibdever.nsu_bank_system_server.service;
 
 import com.sibdever.nsu_bank_system_server.data.model.Operator;
-import com.sibdever.nsu_bank_system_server.data.model.OperatorRegisterCredentials;
+import com.sibdever.nsu_bank_system_server.data.model.request.OperatorRegisterCredentials;
 import com.sibdever.nsu_bank_system_server.data.repo.OperatorsRepo;
 import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import com.sibdever.nsu_bank_system_server.data.model.PasswordResetTokens;
