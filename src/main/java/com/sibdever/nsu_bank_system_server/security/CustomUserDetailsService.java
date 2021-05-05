@@ -1,8 +1,8 @@
 package com.sibdever.nsu_bank_system_server.security;
 
-import com.sibdever.nsu_bank_system_server.operator.Operator;
-import com.sibdever.nsu_bank_system_server.operator.OperatorAuthority;
-import com.sibdever.nsu_bank_system_server.operator.OperatorsRepository;
+import com.sibdever.nsu_bank_system_server.data.model.Operator;
+import com.sibdever.nsu_bank_system_server.data.model.OperatorAuthority;
+import com.sibdever.nsu_bank_system_server.data.repo.OperatorsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

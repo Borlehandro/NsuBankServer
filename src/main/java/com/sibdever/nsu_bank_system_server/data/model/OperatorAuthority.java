@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.operator;
+package com.sibdever.nsu_bank_system_server.data.model;
 
 import org.springframework.security.core.GrantedAuthority;
 

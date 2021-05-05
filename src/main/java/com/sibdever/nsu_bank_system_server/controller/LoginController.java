@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.login;
+package com.sibdever.nsu_bank_system_server.controller;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

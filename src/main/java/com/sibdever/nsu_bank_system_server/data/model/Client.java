@@ -1,7 +1,7 @@
-package com.sibdever.nsu_bank_system_server.client;
+package com.sibdever.nsu_bank_system_server.data.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sibdever.nsu_bank_system_server.offer.Offer;
+import com.sibdever.nsu_bank_system_server.data.model.Offer;
 
 import javax.persistence.*;
 

@@ -1,11 +1,11 @@
-package com.sibdever.nsu_bank_system_server.auth;
+package com.sibdever.nsu_bank_system_server.service;
 
-import com.sibdever.nsu_bank_system_server.operator.Operator;
-import com.sibdever.nsu_bank_system_server.operator.OperatorRegisterCredentials;
-import com.sibdever.nsu_bank_system_server.operator.OperatorsRepository;
-import com.sibdever.nsu_bank_system_server.operator.WrongCredentialsException;
-import com.sibdever.nsu_bank_system_server.password_reset.PasswordResetTokens;
-import com.sibdever.nsu_bank_system_server.password_reset.PasswordResetTokensRepository;
+import com.sibdever.nsu_bank_system_server.data.model.Operator;
+import com.sibdever.nsu_bank_system_server.data.model.OperatorRegisterCredentials;
+import com.sibdever.nsu_bank_system_server.data.repo.OperatorsRepository;
+import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
+import com.sibdever.nsu_bank_system_server.data.model.PasswordResetTokens;
+import com.sibdever.nsu_bank_system_server.data.repo.PasswordResetTokensRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

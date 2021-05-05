@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.operator;
+package com.sibdever.nsu_bank_system_server.data.model;
 
 public enum OperatorRole {
     ROLE_ONE,

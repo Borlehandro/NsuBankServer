@@ -1,6 +1,6 @@
-package com.sibdever.nsu_bank_system_server.password_reset;
+package com.sibdever.nsu_bank_system_server.data.model;
 
-import com.sibdever.nsu_bank_system_server.operator.Operator;
+import com.sibdever.nsu_bank_system_server.data.model.Operator;
 
 import javax.persistence.*;
 

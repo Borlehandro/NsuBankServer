@@ -1,6 +1,4 @@
-package com.sibdever.nsu_bank_system_server.credit;
-
-import com.sibdever.nsu_bank_system_server.payment.Payment;
+package com.sibdever.nsu_bank_system_server.data.model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

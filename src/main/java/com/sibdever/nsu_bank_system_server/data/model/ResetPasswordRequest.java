@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.password_reset;
+package com.sibdever.nsu_bank_system_server.data.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

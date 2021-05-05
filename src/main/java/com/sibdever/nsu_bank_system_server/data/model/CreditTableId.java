@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.credit;
+package com.sibdever.nsu_bank_system_server.data.model;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

@@ -1,7 +1,4 @@
-package com.sibdever.nsu_bank_system_server.credit;
-
-import com.sibdever.nsu_bank_system_server.client.Client;
-import com.sibdever.nsu_bank_system_server.offer.Offer;
+package com.sibdever.nsu_bank_system_server.data.model;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
