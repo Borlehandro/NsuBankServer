@@ -2,7 +2,7 @@ package com.sibdever.nsu_bank_system_server.security;
 
 import com.sibdever.nsu_bank_system_server.data.model.Operator;
 import com.sibdever.nsu_bank_system_server.data.model.OperatorAuthority;
-import com.sibdever.nsu_bank_system_server.data.repo.OperatorsRepository;
+import com.sibdever.nsu_bank_system_server.data.repo.OperatorsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final OperatorsRepository repository;
+    private final OperatorsRepo repository;
 
     @Autowired
-    public CustomUserDetailsService(OperatorsRepository repository) {
+    public CustomUserDetailsService(OperatorsRepo repository) {
         this.repository = repository;
     }
 
