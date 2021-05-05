@@ -1,5 +1,6 @@
 package com.sibdever.nsu_bank_system_server.client;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sibdever.nsu_bank_system_server.offer.Offer;
 
 import javax.persistence.*;
@@ -8,16 +9,15 @@ import javax.persistence.*;
 @Table(name = "clients")
 public class Client {
 
-    public Client(String fullName, boolean blocked) {
+    public Client(@JsonProperty String fullName) {
         this.fullName = fullName;
-        this.blocked = blocked;
     }
 
     public Client() {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(nullable = false)
@@ -51,5 +51,9 @@ public class Client {
 
     public void setOffer(Offer offer) {
         this.offer = offer;
+    }
+
+    public int getId() {
+        return id;
     }
 }
