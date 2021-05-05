@@ -7,6 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 @Configuration
 @EnableWebMvc
+// Todo don't use deprecated!
 public class CorsConfig extends WebMvcConfigurerAdapter {
 
     @Override

@@ -6,10 +6,32 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-public record CustomUserDetails(
-        List<? extends GrantedAuthority> grantedAuthorities,
-        String role, String username, String password, boolean accountNonExpired,
-        boolean credentialsNonExpired, boolean accountNonLocked) implements UserDetails {
+public class CustomUserDetails implements UserDetails {
+
+    private final List<? extends GrantedAuthority> grantedAuthorities;
+    private final String role;
+    private final String username;
+    private final String password;
+    private final boolean accountNonExpired;
+    private final boolean credentialsNonExpired;
+    private final boolean accountNonLocked;
+
+    public CustomUserDetails(List<? extends GrantedAuthority> grantedAuthorities,
+                             String role,
+                             String username,
+                             String password,
+                             boolean accountNonExpired,
+                             boolean credentialsNonExpired,
+                             boolean accountNonLocked) {
+
+        this.grantedAuthorities = grantedAuthorities;
+        this.role = role;
+        this.username = username;
+        this.password = password;
+        this.accountNonExpired = accountNonExpired;
+        this.credentialsNonExpired = credentialsNonExpired;
+        this.accountNonLocked = accountNonLocked;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -43,7 +65,7 @@ public record CustomUserDetails(
 
     @Override
     public boolean isEnabled() {
-        return !accountNonLocked;
+        return accountNonLocked;
     }
 
     public String getRole() {

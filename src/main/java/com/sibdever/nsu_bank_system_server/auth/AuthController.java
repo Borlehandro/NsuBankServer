@@ -17,12 +17,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/login")
-    // TODO Return JWT (Use security)
-    public void login(@RequestBody OperatorRegisterCredentials operatorRegisterCredentials) throws WrongCredentialsException {
-        authService.login(operatorRegisterCredentials);
-    }
-
     @PostMapping("/register")
     public void register(@RequestBody OperatorRegisterCredentials operatorRegisterCredentials) {
         authService.register(operatorRegisterCredentials);
@@ -41,10 +35,4 @@ public class AuthController {
         System.out.println("Reset request: " + token);
         authService.resetPassword(token, newPassword);
     }
-
-    @GetMapping("/test")
-    public String test() {
-        return "OK";
-    }
-
 }

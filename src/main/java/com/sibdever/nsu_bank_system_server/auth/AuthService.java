@@ -18,22 +18,19 @@ import java.util.Base64;
 @Service
 public class AuthService {
 
-    private final OperatorsRepository userRepository;
+    private final OperatorsRepository operatorsRepository;
     private final PasswordResetTokensRepository passwordResetTokensRepository;
     private final PasswordEncoder encoder;
 
     @Autowired
-    public AuthService(OperatorsRepository userRepository, PasswordResetTokensRepository passwordResetTokensRepository, PasswordEncoder encoder) {
-        this.userRepository = userRepository;
+    public AuthService(OperatorsRepository operatorsRepository, PasswordResetTokensRepository passwordResetTokensRepository, PasswordEncoder encoder) {
+        this.operatorsRepository = operatorsRepository;
         this.passwordResetTokensRepository = passwordResetTokensRepository;
         this.encoder = encoder;
     }
 
-    public void login(OperatorRegisterCredentials credentials) {
-    }
-
     public void register(OperatorRegisterCredentials credentials) {
-        userRepository.save(new Operator(
+        operatorsRepository.save(new Operator(
                 credentials.getUsername(),
                 credentials.getFullName(),
                 encoder.encode(credentials.getPassword()),
@@ -41,7 +38,7 @@ public class AuthService {
     }
 
     public String generateTokenForPasswordReset(String username, String secretPhrase) throws WrongCredentialsException {
-        var operator = userRepository.findOperatorByUsername(username);
+        var operator = operatorsRepository.findOperatorByUsername(username);
         if (operator.getSecretPhrase().equals(secretPhrase) && operator.isAccountNonLocked()) {
             operator.setCredentialsNonExpired(false);
             String stringForToken = operator.getSecretPhrase() + System.currentTimeMillis();
@@ -63,6 +60,7 @@ public class AuthService {
     }
 
     // Todo use normal logging
+    // Todo deactivate current JWT after password rest!
     public void resetPassword(String token, String newPassword) throws WrongCredentialsException {
         var resetToken = passwordResetTokensRepository.findFirstByResetToken(token);
         if (resetToken != null) {
@@ -70,8 +68,8 @@ public class AuthService {
             resetToken.getOperator().setPassword(newPassword);
             resetToken.getOperator().setCredentialsNonExpired(true);
             resetToken.getOperator().setPassword(encoder.encode(newPassword));
-            userRepository.save(resetToken.getOperator());
+            operatorsRepository.save(resetToken.getOperator());
+            passwordResetTokensRepository.delete(resetToken);
         } else throw new WrongCredentialsException("Wrong reset token");
     }
-
 }

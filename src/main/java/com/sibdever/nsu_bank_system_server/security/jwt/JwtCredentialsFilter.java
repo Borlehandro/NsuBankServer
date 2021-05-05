@@ -26,12 +26,13 @@ public class JwtCredentialsFilter extends UsernamePasswordAuthenticationFilter {
         this.config = config;
     }
 
-    // You can use simple request arguments here
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response) throws AuthenticationException {
+        System.out.println("attemptAuthentication");
         try(var input = request.getInputStream()) {
             CredentialsAuthenticationRequest credentialsAuthenticationRequest = new ObjectMapper().readValue(input, CredentialsAuthenticationRequest.class);
+            System.out.println(credentialsAuthenticationRequest.getUsername() + " : " + credentialsAuthenticationRequest.getPassword());
             return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(credentialsAuthenticationRequest.getUsername(), credentialsAuthenticationRequest.getPassword()));
         } catch (IOException e) {
             e.printStackTrace();
@@ -39,8 +40,11 @@ public class JwtCredentialsFilter extends UsernamePasswordAuthenticationFilter {
         }
     }
 
+    // Todo use normal logging
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+
+        System.out.println("Successful auth");
 
         String token = Jwts.builder()
                 .setSubject(authResult.getName())
