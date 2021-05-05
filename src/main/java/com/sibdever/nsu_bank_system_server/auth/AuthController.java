@@ -33,13 +33,13 @@ public class AuthController {
         return authService.generateTokenForPasswordReset(request.getUsername(), request.getSecretPhrase());
     }
 
+    // Todo use normal logging
     @PostMapping("/reset-password/{token}")
     public void resetPassword(
             @PathVariable String token,
             @RequestParam String newPassword) throws WrongCredentialsException {
+        System.out.println("Reset request: " + token);
         authService.resetPassword(token, newPassword);
-        // $2a$12$Kyz95NjwBKSqpaLGSkgJkeI.Ns1QVRJRpaeDrClp4eg1Zt891JCDW
-        //
     }
 
     @GetMapping("/test")

@@ -6,7 +6,6 @@ import com.sibdever.nsu_bank_system_server.operator.OperatorsRepository;
 import com.sibdever.nsu_bank_system_server.operator.WrongCredentialsException;
 import com.sibdever.nsu_bank_system_server.password_reset.PasswordResetTokens;
 import com.sibdever.nsu_bank_system_server.password_reset.PasswordResetTokensRepository;
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 @Service
 public class AuthService {
@@ -47,7 +47,7 @@ public class AuthService {
             String stringForToken = operator.getSecretPhrase() + System.currentTimeMillis();
             try {
                 String token =
-                        Base64.encodeBase64URLSafeString(
+                        Base64.getUrlEncoder().withoutPadding().encodeToString(
                                 MessageDigest
                                         .getInstance("SHA-256")
                                         .digest(stringForToken.getBytes(StandardCharsets.UTF_8)));
@@ -62,12 +62,15 @@ public class AuthService {
         }
     }
 
+    // Todo use normal logging
     public void resetPassword(String token, String newPassword) throws WrongCredentialsException {
         var resetToken = passwordResetTokensRepository.findFirstByResetToken(token);
         if (resetToken != null) {
+            System.out.println("On reset: " + resetToken.getOperator().getUsername());
             resetToken.getOperator().setPassword(newPassword);
             resetToken.getOperator().setCredentialsNonExpired(true);
             resetToken.getOperator().setPassword(encoder.encode(newPassword));
+            userRepository.save(resetToken.getOperator());
         } else throw new WrongCredentialsException("Wrong reset token");
     }
 

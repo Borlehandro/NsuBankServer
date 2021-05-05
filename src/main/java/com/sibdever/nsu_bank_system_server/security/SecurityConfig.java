@@ -40,7 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilter(new JwtCredentialsFilter(authenticationManager(), jwtConfig))
                 .addFilterAfter(new JwtTokenFilter(jwtConfig), JwtCredentialsFilter.class)
                 .authorizeRequests()
-                .antMatchers("/auth/*").permitAll()
+                .antMatchers("/auth/*", "/auth/reset-password/*").permitAll()
                 .anyRequest()
                 .authenticated();
     }
