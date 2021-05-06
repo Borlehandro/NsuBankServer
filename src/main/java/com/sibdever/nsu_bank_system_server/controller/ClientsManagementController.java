@@ -1,6 +1,9 @@
 package com.sibdever.nsu_bank_system_server.controller;
 
+import com.sibdever.nsu_bank_system_server.data.model.Credit;
 import com.sibdever.nsu_bank_system_server.data.model.request.ClientLockRequest;
+import com.sibdever.nsu_bank_system_server.data.model.request.GiveCreditRequest;
+import com.sibdever.nsu_bank_system_server.data.model.request.SetOfferRequest;
 import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import com.sibdever.nsu_bank_system_server.service.ClientsManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,5 +30,20 @@ public class ClientsManagementController {
                         .plusMinutes(request.getMinutes())
                         .plusSeconds(request.getSeconds())
         );
+    }
+
+    @PostMapping("/set-offer")
+    public void setOffer(@RequestBody SetOfferRequest request) throws WrongCredentialsException {
+        clientsManagementService.setClientOffer(request.getClientId(), request.getOfferId());
+    }
+
+    @PostMapping("/give-credit")
+    public Credit giveCredit(@RequestBody GiveCreditRequest request) throws WrongCredentialsException {
+        return clientsManagementService.giveCredit(
+                request.getClientId(),
+                request.getOfferId(),
+                request.getMonthPeriod(),
+                request.getSum(),
+                request.getPaymentChannel());
     }
 }

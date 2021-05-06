@@ -87,4 +87,8 @@ public class Offer {
     public void setMaximumSum(int maximumSum) {
         this.maximumSum = maximumSum;
     }
+
+    public int getId() {
+        return id;
+    }
 }

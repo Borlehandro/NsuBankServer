@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CreditTableRepo extends CrudRepository<CreditsTable, Integer> {
-    @Query("select ct from CreditsTable ct where ct.credit.id = ?1")
+public interface CreditTableRepo extends CrudRepository<CreditsTable, CreditTableId> {
+    @Query("select ct from CreditsTable ct where ct.id.credit.id = ?1")
     List<CreditsTable> findAllByCreditId(int id);
 }

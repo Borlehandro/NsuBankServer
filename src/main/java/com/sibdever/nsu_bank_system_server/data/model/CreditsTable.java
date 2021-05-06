@@ -1,39 +1,46 @@
 package com.sibdever.nsu_bank_system_server.data.model;
 
+import org.springframework.lang.Nullable;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@IdClass(CreditTableId.class)
 public class CreditsTable {
+
+    @EmbeddedId
+    private CreditTableId id;
 
     public CreditsTable() {
     }
 
-    public CreditsTable(Credit credit, Payment payment, double expectedPayout, double paymentOfPercents, double paymentOfDebt, double balanceAfterPayment, LocalDateTime timestamp) {
-        this.credit = credit;
+    public CreditsTable(CreditTableId creditTableId, double expectedPayout, double paymentOfPercents, double paymentOfDebt, double balanceAfterPayment, CreditStatus creditStatusAfterPayment) {
+        this.expectedPayout = expectedPayout;
+        this.paymentOfPercents = paymentOfPercents;
+        this.paymentOfDebt = paymentOfDebt;
+        this.balanceAfterPayment = balanceAfterPayment;
+        this.creditStatusAfterPayment = creditStatusAfterPayment;
+        this.id = creditTableId;
+    }
+
+    public CreditsTable(CreditTableId creditTableId, Payment payment, double expectedPayout, double paymentOfPercents, double paymentOfDebt, double balanceAfterPayment) {
         this.payment = payment;
         this.expectedPayout = expectedPayout;
         this.paymentOfPercents = paymentOfPercents;
         this.paymentOfDebt = paymentOfDebt;
         this.balanceAfterPayment = balanceAfterPayment;
-        this.timestamp = timestamp;
+        this.id = creditTableId;
     }
 
-    public CreditsTable(Credit credit, Payment payment, double expectedPayout, double paymentOfPercents, double paymentOfDebt, double balanceAfterPayment, CreditStatus creditStatusAfterPayment, LocalDateTime timestamp) {
-        this.credit = credit;
+    public CreditsTable(CreditTableId creditTableId, Payment payment, double expectedPayout, double paymentOfPercents, double paymentOfDebt, double balanceAfterPayment, CreditStatus creditStatusAfterPayment) {
+        this.id = creditTableId;
         this.payment = payment;
         this.expectedPayout = expectedPayout;
         this.paymentOfPercents = paymentOfPercents;
         this.paymentOfDebt = paymentOfDebt;
         this.balanceAfterPayment = balanceAfterPayment;
         this.creditStatusAfterPayment = creditStatusAfterPayment;
-        this.timestamp = timestamp;
     }
-
-    @Id
-    @OneToOne
-    private Credit credit;
 
     @OneToOne
     private Payment payment;
@@ -50,15 +57,12 @@ public class CreditsTable {
     @Column(nullable = false)
     private CreditStatus creditStatusAfterPayment = CreditStatus.ACTIVE;
 
-    @Id
-    private LocalDateTime timestamp;
-
     public Credit getCredit() {
-        return credit;
+        return id.getCredit();
     }
 
-    public void setCredit(Credit credit) {
-        this.credit = credit;
+    public CreditTableId getId() {
+        return id;
     }
 
     public Payment getPayment() {
@@ -110,10 +114,6 @@ public class CreditsTable {
     }
 
     public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
+        return id.getTimestamp();
     }
 }

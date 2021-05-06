@@ -1,13 +1,18 @@
 package com.sibdever.nsu_bank_system_server.data.model;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Embeddable
 public class CreditTableId implements Serializable {
 
-    protected Credit credit;
-    protected LocalDateTime timestamp;
+    @OneToOne
+    private Credit credit;
+
+    @Column(nullable = false)
+    private LocalDateTime timestamp;
 
     public CreditTableId(){}
 
@@ -26,5 +31,21 @@ public class CreditTableId implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(credit, timestamp);
+    }
+
+    public Credit getCredit() {
+        return credit;
+    }
+
+    public void setCredit(Credit credit) {
+        this.credit = credit;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }

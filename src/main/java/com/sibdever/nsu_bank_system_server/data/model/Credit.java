@@ -18,6 +18,15 @@ public class Credit {
         this.balance = sum;
     }
 
+    public Credit(Client client, ZonedDateTime startDate, int mouthPeriod, double sum, double balance, Offer offer) {
+        this.client = client;
+        this.startDate = startDate;
+        this.mouthPeriod = mouthPeriod;
+        this.sum = sum;
+        this.balance = balance;
+        this.offer = offer;
+    }
+
     public Credit(Client client, ZonedDateTime startDate, int mouthPeriod, double sum, double balance) {
         this.client = client;
         this.startDate = startDate;
