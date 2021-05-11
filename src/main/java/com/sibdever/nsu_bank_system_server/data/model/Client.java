@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sibdever.nsu_bank_system_server.data.model.Offer;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name = "clients")
-public class Client {
+public class Client implements Serializable {
 
     public Client(@JsonProperty String fullName) {
         this.fullName = fullName;
@@ -23,9 +25,6 @@ public class Client {
     @Column(nullable = false)
     private String fullName;
 
-    @Column(nullable = false)
-    private boolean blocked = false;
-
     @OneToOne
     private Offer offer;
 
@@ -35,14 +34,6 @@ public class Client {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public boolean isBlocked() {
-        return blocked;
-    }
-
-    public void setBlocked(boolean blocked) {
-        this.blocked = blocked;
     }
 
     public Offer getOffer() {
@@ -55,5 +46,18 @@ public class Client {
 
     public int getId() {
         return id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Client)) return false;
+        Client client = (Client) o;
+        return id == client.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

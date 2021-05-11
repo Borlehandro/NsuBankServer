@@ -1,10 +1,12 @@
 package com.sibdever.nsu_bank_system_server.data.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name = "offers")
-public class Offer {
+public class Offer implements Serializable {
 
     public Offer() {
     }
@@ -90,5 +92,18 @@ public class Offer {
 
     public int getId() {
         return id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Offer)) return false;
+        Offer offer = (Offer) o;
+        return id == offer.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

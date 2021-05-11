@@ -1,18 +1,16 @@
 package com.sibdever.nsu_bank_system_server.service;
 
-import com.sibdever.nsu_bank_system_server.data.model.ClientLocking;
-import com.sibdever.nsu_bank_system_server.data.model.Credit;
-import com.sibdever.nsu_bank_system_server.data.model.PaymentChannel;
+import com.sibdever.nsu_bank_system_server.data.model.*;
 import com.sibdever.nsu_bank_system_server.data.repo.ClientLocksRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.ClientsRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.CrudOffersRepo;
+import com.sibdever.nsu_bank_system_server.data.repo.OffersHistoryRepo;
 import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.Period;
 
 @Service
 public class ClientsManagementService {
@@ -25,6 +23,8 @@ public class ClientsManagementService {
     private ClientLocksRepo locksRepo;
     @Autowired
     private CreditsManagementService creditsService;
+    @Autowired
+    private OffersHistoryRepo offersHistoryRepo;
 
     public void lockClient(int id, Duration lockingDuration) throws WrongCredentialsException {
         var opt = clientsRepo.findById(id);
@@ -33,7 +33,6 @@ public class ClientsManagementService {
             var client = opt.get();
             var now = LocalDateTime.now();
             locksRepo.save(new ClientLocking(client, now, now.plus(lockingDuration)));
-            client.setBlocked(true);
             clientsRepo.save(client);
         } else {
             throw new WrongCredentialsException("Client not found");
@@ -46,7 +45,9 @@ public class ClientsManagementService {
 
         if(optClient.isPresent() && optOffer.isPresent()) {
             var client = optClient.get();
-            client.setOffer(optOffer.get());
+            var offer = optOffer.get();
+            client.setOffer(offer);
+            offersHistoryRepo.save(new OfferHistoryRecord(new OffersHistoryId(client, offer, LocalDateTime.now())));
             clientsRepo.save(client);
         } else {
             throw new WrongCredentialsException("Client not found");

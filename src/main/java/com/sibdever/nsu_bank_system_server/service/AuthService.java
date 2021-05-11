@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 
 @Service
@@ -40,7 +42,6 @@ public class AuthService {
     public String generateTokenForPasswordReset(String username, String secretPhrase) throws WrongCredentialsException {
         var operator = operatorsRepo.findOperatorByUsername(username);
         if (operator.getSecretPhrase().equals(secretPhrase) && operator.isAccountNonLocked()) {
-            operator.setCredentialsNonExpired(false);
             String stringForToken = operator.getSecretPhrase() + System.currentTimeMillis();
             try {
                 String token =
@@ -48,8 +49,13 @@ public class AuthService {
                                 MessageDigest
                                         .getInstance("SHA-256")
                                         .digest(stringForToken.getBytes(StandardCharsets.UTF_8)));
-
-                passwordResetTokensRepo.save(new PasswordResetTokens(operator, token));
+                // Todo read ttl from configs
+                passwordResetTokensRepo.save(new PasswordResetTokens(
+                        operator,
+                        token,
+                        3600,
+                        LocalDateTime.now()
+                ));
                 return token;
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
@@ -64,12 +70,19 @@ public class AuthService {
     public void resetPassword(String token, String newPassword) throws WrongCredentialsException {
         var resetToken = passwordResetTokensRepo.findFirstByResetToken(token);
         if (resetToken != null) {
-            System.out.println("On reset: " + resetToken.getOperator().getUsername());
-            resetToken.getOperator().setPassword(newPassword);
-            resetToken.getOperator().setCredentialsNonExpired(true);
-            resetToken.getOperator().setPassword(encoder.encode(newPassword));
-            operatorsRepo.save(resetToken.getOperator());
-            passwordResetTokensRepo.delete(resetToken);
+            if (resetToken.getGenerationTime()
+                    .plus(resetToken.getTimeToLiveSeconds(), ChronoUnit.SECONDS)
+                    .isAfter(LocalDateTime.now())) {
+                System.out.println("On reset: " + resetToken.getOperator().getUsername());
+                resetToken.getOperator().setPassword(newPassword);
+                resetToken.getOperator().setCredentialsNonExpired(true);
+                resetToken.getOperator().setPassword(encoder.encode(newPassword));
+                operatorsRepo.save(resetToken.getOperator());
+                passwordResetTokensRepo.delete(resetToken);
+            } else {
+                passwordResetTokensRepo.delete(resetToken);
+                throw new WrongCredentialsException("Token is out of date");
+            }
         } else throw new WrongCredentialsException("Wrong reset token");
     }
 }

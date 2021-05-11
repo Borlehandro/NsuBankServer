@@ -1,9 +1,12 @@
 package com.sibdever.nsu_bank_system_server.data.model;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 public class CreditsTable {
@@ -23,7 +26,7 @@ public class CreditsTable {
         this.id = creditTableId;
     }
 
-    public CreditsTable(CreditTableId creditTableId, Payment payment, double expectedPayout, double paymentOfPercents, double paymentOfDebt, double balanceAfterPayment) {
+    public CreditsTable(CreditTableId creditTableId, Set<Payment> payment, double expectedPayout, double paymentOfPercents, double paymentOfDebt, double balanceAfterPayment) {
         this.payment = payment;
         this.expectedPayout = expectedPayout;
         this.paymentOfPercents = paymentOfPercents;
@@ -32,7 +35,7 @@ public class CreditsTable {
         this.id = creditTableId;
     }
 
-    public CreditsTable(CreditTableId creditTableId, Payment payment, double expectedPayout, double paymentOfPercents, double paymentOfDebt, double balanceAfterPayment, CreditStatus creditStatusAfterPayment) {
+    public CreditsTable(CreditTableId creditTableId, Set<Payment> payment, double expectedPayout, double paymentOfPercents, double paymentOfDebt, double balanceAfterPayment, CreditStatus creditStatusAfterPayment) {
         this.id = creditTableId;
         this.payment = payment;
         this.expectedPayout = expectedPayout;
@@ -42,8 +45,9 @@ public class CreditsTable {
         this.creditStatusAfterPayment = creditStatusAfterPayment;
     }
 
-    @OneToOne
-    private Payment payment;
+    @OneToMany
+    @LazyCollection(LazyCollectionOption.TRUE)
+    private Set<Payment> payment;
 
     private double expectedPayout;
 
@@ -65,11 +69,11 @@ public class CreditsTable {
         return id;
     }
 
-    public Payment getPayment() {
+    public Set<Payment> getPayment() {
         return payment;
     }
 
-    public void setPayment(Payment payment) {
+    public void setPayment(Set<Payment> payment) {
         this.payment = payment;
     }
 
