@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -31,6 +32,7 @@ public class AuthService {
         this.encoder = encoder;
     }
 
+    @Transactional
     public void register(OperatorRegisterCredentials credentials) {
         operatorsRepo.save(new Operator(
                 credentials.getUsername(),
@@ -39,6 +41,7 @@ public class AuthService {
                 credentials.getSecretPhrase()));
     }
 
+    @Transactional
     public String generateTokenForPasswordReset(String username, String secretPhrase) throws WrongCredentialsException {
         var operator = operatorsRepo.findOperatorByUsername(username);
         if (operator.getSecretPhrase().equals(secretPhrase) && operator.isAccountNonLocked()) {
@@ -67,6 +70,7 @@ public class AuthService {
 
     // Todo use normal logging
     // Todo deactivate current JWT after password rest!
+    @Transactional
     public void resetPassword(String token, String newPassword) throws WrongCredentialsException {
         var resetToken = passwordResetTokensRepo.findFirstByResetToken(token);
         if (resetToken != null) {

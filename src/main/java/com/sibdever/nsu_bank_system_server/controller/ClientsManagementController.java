@@ -32,6 +32,11 @@ public class ClientsManagementController {
         );
     }
 
+    @PostMapping("/unlock")
+    public void unlockClient(int clientId) throws WrongCredentialsException {
+        clientsManagementService.unlockClient(clientId);
+    }
+
     @PostMapping("/set-offer")
     public void setOffer(@RequestBody SetOfferRequest request) throws WrongCredentialsException {
         clientsManagementService.setClientOffer(request.getClientId(), request.getOfferId());

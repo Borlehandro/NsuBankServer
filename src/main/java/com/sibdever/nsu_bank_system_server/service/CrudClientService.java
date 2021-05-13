@@ -5,9 +5,11 @@ import com.sibdever.nsu_bank_system_server.data.repo.ClientsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
+@Transactional
 public class CrudClientService {
     @Autowired
     private ClientsRepo clientsRepo;

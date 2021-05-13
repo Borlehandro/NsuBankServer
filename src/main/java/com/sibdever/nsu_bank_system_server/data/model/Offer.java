@@ -1,22 +1,26 @@
 package com.sibdever.nsu_bank_system_server.data.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Objects;
 
 @Entity
 @Table(name = "offers")
+@Data
+@NoArgsConstructor
+@RequiredArgsConstructor
 public class Offer implements Serializable {
 
-    public Offer() {
-    }
-
-    public Offer(String name, double percentsPerMonth) {
-        this.name = name;
-        this.percentsPerMonth = percentsPerMonth;
-    }
-
-    public Offer(String name, double percentsPerMonth, int minimumMonthPeriod, int maximumMonthPeriod, int minimumSum, int maximumSum) {
+    public Offer(String name,
+                 double percentsPerMonth,
+                 int minimumMonthPeriod,
+                 int maximumMonthPeriod,
+                 int minimumSum,
+                 int maximumSum) {
         this.name = name;
         this.percentsPerMonth = percentsPerMonth;
         this.minimumMonthPeriod = minimumMonthPeriod;
@@ -32,78 +36,14 @@ public class Offer implements Serializable {
     private String name;
 
     @Column(nullable = false)
-    private double percentsPerMonth;
+    @NonNull
+    private Double percentsPerMonth;
 
-    private int minimumMonthPeriod = -1;
+    private Integer minimumMonthPeriod;
 
-    private int maximumMonthPeriod = -1;
+    private Integer maximumMonthPeriod;
 
-    private int minimumSum;
+    private Integer minimumSum;
 
-    private int maximumSum;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public double getPercentsPerMonth() {
-        return percentsPerMonth;
-    }
-
-    public void setPercentsPerMonth(double percentPerMonth) {
-        this.percentsPerMonth = percentPerMonth;
-    }
-
-    public int getMinimumMonthPeriod() {
-        return minimumMonthPeriod;
-    }
-
-    public void setMinimumMonthPeriod(int minimumPeriod) {
-        this.minimumMonthPeriod = minimumPeriod;
-    }
-
-    public int getMaximumMonthPeriod() {
-        return maximumMonthPeriod;
-    }
-
-    public void setMaximumMonthPeriod(int maximumPeriod) {
-        this.maximumMonthPeriod = maximumPeriod;
-    }
-
-    public int getMinimumSum() {
-        return minimumSum;
-    }
-
-    public void setMinimumSum(int minimumSum) {
-        this.minimumSum = minimumSum;
-    }
-
-    public int getMaximumSum() {
-        return maximumSum;
-    }
-
-    public void setMaximumSum(int maximumSum) {
-        this.maximumSum = maximumSum;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Offer)) return false;
-        Offer offer = (Offer) o;
-        return id == offer.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
+    private Integer maximumSum;
 }

@@ -1,19 +1,18 @@
 package com.sibdever.nsu_bank_system_server.data.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Data
+@NoArgsConstructor
+@RequiredArgsConstructor
 public class PasswordResetTokens {
-
-    public PasswordResetTokens() {}
-
-    public PasswordResetTokens(Operator operator, String resetToken, int timeToLiveSeconds, LocalDateTime generationTime) {
-        this.operator = operator;
-        this.resetToken = resetToken;
-        this.timeToLiveSeconds = timeToLiveSeconds;
-        this.generationTime = generationTime;
-    }
 
     @Id
     private int operatorId;
@@ -21,30 +20,19 @@ public class PasswordResetTokens {
     @OneToOne
     @MapsId
     @JoinColumn(name = "operator_id")
+    @NonNull
     private Operator operator;
 
     @Column(nullable = false)
+    @NonNull
     private String resetToken;
 
     @Column(nullable = false)
-    private int timeToLiveSeconds;
+    @NonNull
+    private Integer timeToLiveSeconds;
 
     @Column(nullable = false)
+    @NonNull
     private LocalDateTime generationTime;
 
-    public Operator getOperator() {
-        return operator;
-    }
-
-    public String getResetToken() {
-        return resetToken;
-    }
-
-    public int getTimeToLiveSeconds() {
-        return timeToLiveSeconds;
-    }
-
-    public LocalDateTime getGenerationTime() {
-        return generationTime;
-    }
 }

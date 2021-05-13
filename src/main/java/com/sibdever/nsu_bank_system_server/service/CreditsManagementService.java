@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -22,24 +23,25 @@ public class CreditsManagementService {
     @Autowired
     private CrudPaymentsRepo paymentsRepo;
 
+    // Caller method is Transactional
     public Credit giveCredit(Client client, Offer offer, int monthPeriod, double sum, PaymentChannel payTo) {
         // Todo make it transactional
         // Todo use BigDecimal
         var credit = new Credit(
                 client,
-                ZonedDateTime.now(),
+                LocalDateTime.now(),
                 monthPeriod,
                 sum,
                 sum + sum * (payTo.getCommissionPercents() / 100d),
                 offer);
 
-        var creditRes = creditsRepo.save(credit);
+        var creditRes = creditsRepo.saveAndFlush(credit);
         paymentsRepo.save(new Payment(client, ZonedDateTime.now(), credit, PaymentType.RELEASE, payTo, sum));
         // Todo write into CreditsTable here.
         var finalTime = credit.getStartDate().plus(monthPeriod, ChronoUnit.MONTHS);
         double monthPayout = calculateMonthPayout(credit.getBalance(), offer.getPercentsPerMonth(), monthPeriod);
         double currentBalance = credit.getBalance();
-        for(ZonedDateTime time = credit.getStartDate().plus(1, ChronoUnit.MONTHS);
+        for(LocalDateTime time = credit.getStartDate().plus(1, ChronoUnit.MONTHS);
             time.isBefore(finalTime) || time.isEqual(finalTime);
             time = time.plus(1, ChronoUnit.MONTHS)) {
 
@@ -49,7 +51,7 @@ public class CreditsManagementService {
 
             // Todo don't use zoned time
             creditTableRepo.save(new CreditsTable(
-                    new CreditTableId(credit, time.toLocalDateTime()),
+                    new CreditTableId(credit, time),
                     monthPayout,
                     paymentOfPercents,
                     paymentOfDebt,

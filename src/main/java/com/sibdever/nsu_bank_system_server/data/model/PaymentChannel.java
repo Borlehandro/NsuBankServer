@@ -7,7 +7,7 @@ public enum PaymentChannel {
         this.commissionPercents = commissionPercents;
     }
 
-    private int commissionPercents;
+    private final int commissionPercents;
 
     public int getCommissionPercents() {
         return commissionPercents;

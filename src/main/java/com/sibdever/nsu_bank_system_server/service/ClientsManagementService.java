@@ -9,6 +9,7 @@ import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -26,10 +27,10 @@ public class ClientsManagementService {
     @Autowired
     private OffersHistoryRepo offersHistoryRepo;
 
+    @Transactional
     public void lockClient(int id, Duration lockingDuration) throws WrongCredentialsException {
         var opt = clientsRepo.findById(id);
-
-        if(opt.isPresent()) {
+        if (opt.isPresent()) {
             var client = opt.get();
             var now = LocalDateTime.now();
             locksRepo.save(new ClientLocking(client, now, now.plus(lockingDuration)));
@@ -39,32 +40,31 @@ public class ClientsManagementService {
         }
     }
 
+    @Transactional
     public void setClientOffer(int clientId, int offerId) throws WrongCredentialsException {
         var optClient = clientsRepo.findById(clientId);
         var optOffer = offersRepo.findById(offerId);
-
-        if(optClient.isPresent() && optOffer.isPresent()) {
+        if (optClient.isPresent() && optOffer.isPresent()) {
             var client = optClient.get();
+            checkClientLock(client);
             var offer = optOffer.get();
             client.setOffer(offer);
             offersHistoryRepo.save(new OfferHistoryRecord(new OffersHistoryId(client, offer, LocalDateTime.now())));
-            clientsRepo.save(client);
         } else {
             throw new WrongCredentialsException("Client not found");
         }
     }
 
+    @Transactional
     public Credit giveCredit(int clientId, int offerId, int monthPeriod, double sum, PaymentChannel paymentChannel)
             throws WrongCredentialsException {
-
         var optClient = clientsRepo.findById(clientId);
-        if(optClient.isPresent()) {
+        if (optClient.isPresent()) {
             var client = optClient.get();
-            if(client.getOffer() != null) {
+            checkClientLock(client);
+            if (client.getOffer() != null) {
                 var offer = client.getOffer();
-                System.out.println("AFTER GET OFFER: " + offer);
-                System.out.println("AFTER GET OFFER: " + offer.getPercentsPerMonth());
-                if(offerId == offer.getId()) {
+                if (offerId == offer.getId()) {
                     if (sum <= offer.getMaximumSum()
                             && sum >= offer.getMinimumSum()
                             && monthPeriod <= offer.getMaximumMonthPeriod()
@@ -79,6 +79,28 @@ public class ClientsManagementService {
 
         } else
             throw new WrongCredentialsException("Client not found");
+    }
+
+    @Transactional
+    public void unlockClient(int clientId) throws WrongCredentialsException {
+        var opt = clientsRepo.findById(clientId);
+        if(opt.isPresent()) {
+            var optLock = locksRepo.findById(clientId);
+            optLock.ifPresent(clientLocking -> locksRepo.delete(clientLocking));
+        } else
+            throw new WrongCredentialsException("Client not found");
+    }
+
+    private void checkClientLock(Client client) throws WrongCredentialsException {
+        var optLock = locksRepo.findById(client.getId());
+        if (optLock.isPresent()) {
+            if (optLock.get().getLockingEnd().isAfter(LocalDateTime.now())) {
+                throw new WrongCredentialsException("Client is locked");
+            } else {
+                locksRepo.delete(optLock.get());
+                locksRepo.flush();
+            }
+        }
     }
 
 }
