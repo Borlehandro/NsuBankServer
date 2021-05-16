@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestPropertySource;
 
+import javax.transaction.Transactional;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
@@ -32,6 +33,8 @@ public class CreditTableRecalculationTests {
     private DailyScheduledService dailyScheduledService;
     @Autowired
     private CrudCreditTableService creditTableService;
+    @Autowired
+    private CrudCreditService creditService;
 
     @BeforeAll
     @Rollback(false)
@@ -46,6 +49,7 @@ public class CreditTableRecalculationTests {
     }
 
     @Test
+    @Transactional
     public void testCreditTable() {
         creditTableService.findByCreditId(testCredit.getId()).forEach(row -> {
             System.out.println(row.getExpectedPayout());
@@ -54,7 +58,7 @@ public class CreditTableRecalculationTests {
     }
 
     @Test
-    @Rollback
+    @Transactional
     public void testDailySchedule() throws WrongCredentialsException {
 
         paymentsManagementService.processPayment(
@@ -70,6 +74,7 @@ public class CreditTableRecalculationTests {
         dailyScheduledService.manageDailyPayments();
         var updatedTable = creditTableService.findByCreditId(testCredit.getId());
         updatedTable.sort(Comparator.comparing(tableRow -> tableRow.getId().getTimestamp()));
+
         assertEquals(1000.0, updatedTable.get(0).getExpectedPayout());
         System.out.println("FEE:" + updatedTable.get(0).getFee());
         assertTrue(Math.abs(updatedTable.get(0).getFee() - 30) < 1);
@@ -83,4 +88,27 @@ public class CreditTableRecalculationTests {
         );
     }
 
+    @Test
+    @Transactional
+    public void testCreditClosing() throws WrongCredentialsException {
+        paymentsManagementService.processPayment(
+                testClient.getId(),
+                testCredit.getId(),
+                new PaymentDetails(
+                        testCredit.getStartDate().plus(1, ChronoUnit.HOURS),
+                        PaymentType.REFUND,
+                        PaymentChannel.BANK_ACCOUNT,
+                        10201.0)
+        );
+
+        dailyScheduledService.manageDailyPayments();
+
+        var updatedTable = creditTableService.findByCreditId(testCredit.getId());
+        updatedTable.forEach(System.out::println);
+        updatedTable.sort(Comparator.comparing(tableRow -> tableRow.getId().getTimestamp()));
+
+        assertEquals(CreditStatus.CLOSED, updatedTable.get(0).getCreditStatusAfterPayment());
+        assertEquals(CreditStatus.CLOSED, creditService.findById(testCredit.getId()).getStatus());
+        assertEquals(1, updatedTable.size());
+    }
 }

@@ -62,6 +62,7 @@ public class CreditsManagementService {
         return creditRes;
     }
 
+    // Caller method is Transactional
     private void updateCreditTimetable(List<CreditsTable> rowsToUpdate, double startBalance, double monthPercent) {
         double monthPayout = calculateMonthPayout(startBalance, monthPercent, rowsToUpdate.size());
         double currentBalance = startBalance;
@@ -74,6 +75,7 @@ public class CreditsManagementService {
             row.setExpectedPayout(monthPayout);
             row.setBalanceAfterPayment(currentBalance);
             row.setCreditStatusAfterPayment(Math.abs(currentBalance) < 0.01d ? CreditStatus.CLOSED : CreditStatus.ACTIVE);
+
         }
     }
 
@@ -108,10 +110,17 @@ public class CreditsManagementService {
         currentMonthRow.setFee(fee);
         currentMonthRow.setBalanceAfterPayment(credit.getBalance() - paymentOfDebt + fee);
         credit.setBalance(credit.getBalance() - paymentOfDebt + fee);
-        if (Math.abs(credit.getBalance()) < 0.01d)
+        if (Math.abs(credit.getBalance()) < 0.01d) {
             credit.setStatus(CreditStatus.CLOSED);
-        else
-            updateCreditTimetable(timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()), credit.getBalance(), credit.getOffer().getPercentsPerMonth());
+            creditsRepo.flush();
+            currentMonthRow.setCreditStatusAfterPayment(CreditStatus.CLOSED);
+            creditTableRepo.deleteAll(timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()));
+        } else {
+            updateCreditTimetable(
+                    timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()),
+                    credit.getBalance(),
+                    credit.getOffer().getPercentsPerMonth());
+        }
     }
 
     private double calculatePaymentsSum(Set<Payment> payments) {
