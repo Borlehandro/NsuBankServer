@@ -50,6 +50,22 @@ public class CreditsTable {
         this.id = creditTableId;
     }
 
+    public CreditsTable(@NonNull CreditTableId creditTableId,
+                        Set<Payment> payment,
+                        double expectedPayout,
+                        double paymentOfPercents,
+                        double paymentOfDebt,
+                        double balanceAfterPayment,
+                        double fee) {
+        this.payment = payment;
+        this.expectedPayout = expectedPayout;
+        this.paymentOfPercents = paymentOfPercents;
+        this.paymentOfDebt = paymentOfDebt;
+        this.balanceAfterPayment = balanceAfterPayment;
+        this.id = creditTableId;
+        this.fee = fee;
+    }
+
     // Todo use LAZY
     @OneToMany(fetch = FetchType.EAGER)
     private Set<Payment> payment;
@@ -61,6 +77,8 @@ public class CreditsTable {
     private double paymentOfDebt;
 
     private double balanceAfterPayment;
+
+    private double fee;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)

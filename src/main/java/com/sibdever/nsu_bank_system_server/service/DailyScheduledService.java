@@ -21,6 +21,7 @@ public class DailyScheduledService {
 
     private LocalDateTime lastLaunch = LocalDateTime.now();
 
+    // Todo use cron
     @Scheduled(fixedDelay = 1000)
     @Transactional
     public void manageDailyPayments() {

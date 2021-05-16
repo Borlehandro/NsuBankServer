@@ -63,7 +63,7 @@ public class CreditTableRecalculationTests {
                 new PaymentDetails(
                         testCredit.getStartDate().plus(1, ChronoUnit.HOURS),
                         PaymentType.REFUND,
-                        PaymentChannel.BANK_ACCOUNT,
+                        PaymentChannel.YOO_MONEY,
                         1000.0)
         );
 
@@ -71,14 +71,16 @@ public class CreditTableRecalculationTests {
         var updatedTable = creditTableService.findByCreditId(testCredit.getId());
         updatedTable.sort(Comparator.comparing(tableRow -> tableRow.getId().getTimestamp()));
         assertEquals(1000.0, updatedTable.get(0).getExpectedPayout());
+        System.out.println("FEE:" + updatedTable.get(0).getFee());
+        assertTrue(Math.abs(updatedTable.get(0).getFee() - 30) < 1);
+        assertTrue(Math.abs(updatedTable.get(0).getBalanceAfterPayment() - 9231.0) < 1);
+        System.out.println("LAST: " + updatedTable.get(updatedTable.size() - 1));
         updatedTable.subList(1, updatedTable.size()).forEach(
                 (item) -> {
                     System.out.println(item.getExpectedPayout());
-                    assertTrue(Math.abs(item.getExpectedPayout() - 887.0) < 1);
+                    assertTrue(Math.abs(item.getExpectedPayout() - 890.0) < 1);
                 }
         );
-        assertTrue(updatedTable.get(1).getBalanceAfterPayment() <= 8407.0
-                && updatedTable.get(1).getBalanceAfterPayment() >= 8406.0);
-
     }
+
 }

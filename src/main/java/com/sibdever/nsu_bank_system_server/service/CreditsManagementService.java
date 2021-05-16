@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +32,7 @@ public class CreditsManagementService {
                 LocalDateTime.now(),
                 monthPeriod,
                 sum,
-                sum + sum * (payTo.getCommissionPercents() / 100d),
+                sum + sum * (payTo.getFeePercents() / 100d),
                 offer);
 
         var creditRes = creditsRepo.saveAndFlush(credit);
@@ -79,10 +78,11 @@ public class CreditsManagementService {
     }
 
     // Caller method is Transactional
-    // Todo calculate commission!
+    // Todo calculate fee!
     public void recalculateCreditTableWithDailyPayments(Credit credit, Set<Payment> payments) {
         var afterTime = payments.stream().findFirst().get().getPaymentDetails().getTimestamp();
         double sum = calculatePaymentsSum(payments);
+        double fee = calculateSummaryFee(payments);
         var timetableRowsToCalculate =
                 creditTableRepo.findAllByCreditIdWhereDateAfterOrEquals(credit.getId(), afterTime);
 
@@ -90,29 +90,43 @@ public class CreditsManagementService {
 
         var previousPayments = currentMonthRow.getPayment();
 
-        if(previousPayments != null) {
-            if(!previousPayments.isEmpty())
+        if (previousPayments != null) {
+            if (!previousPayments.isEmpty())
                 sum += currentMonthRow.getExpectedPayout();
             previousPayments.addAll(payments);
         } else currentMonthRow.setPayment(payments);
 
         currentMonthRow.setExpectedPayout(sum);
+
         double paymentOfPercents =
                 calculatePaymentOfPercents(credit.getOffer().getPercentsPerMonth(), credit.getBalance());
+
         double paymentOfDebt = calculatePaymentOfDebt(sum, paymentOfPercents);
+
         currentMonthRow.setPaymentOfPercents(paymentOfPercents);
         currentMonthRow.setPaymentOfDebt(paymentOfDebt);
-        currentMonthRow.setBalanceAfterPayment(credit.getBalance() - paymentOfDebt);
-        credit.setBalance(credit.getBalance() - paymentOfDebt);
-        if(Math.abs(credit.getBalance()) < 0.01d)
+        currentMonthRow.setFee(fee);
+        currentMonthRow.setBalanceAfterPayment(credit.getBalance() - paymentOfDebt + fee);
+        credit.setBalance(credit.getBalance() - paymentOfDebt + fee);
+        if (Math.abs(credit.getBalance()) < 0.01d)
             credit.setStatus(CreditStatus.CLOSED);
         else
             updateCreditTimetable(timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()), credit.getBalance(), credit.getOffer().getPercentsPerMonth());
     }
 
-    public double calculatePaymentsSum(Set<Payment> payments) {
+    private double calculatePaymentsSum(Set<Payment> payments) {
         return payments.stream().reduce(BigDecimal.ZERO,
                 (sum, payment) -> sum.add(BigDecimal.valueOf(payment.getPaymentDetails().getPaymentSum())),
+                BigDecimal::add).doubleValue();
+    }
+
+    private double calculateSummaryFee(Set<Payment> payments) {
+        return payments.stream().reduce(BigDecimal.ZERO,
+                (sum, payment) -> sum
+                        .add(BigDecimal.valueOf(payment.getPaymentDetails().getPaymentSum())
+                                .multiply(BigDecimal.valueOf(payment.getPaymentDetails().getChannel().getFeePercents())
+                                        .divide(BigDecimal.valueOf(100), 3, RoundingMode.HALF_UP))
+                        ),
                 BigDecimal::add).doubleValue();
     }
 
