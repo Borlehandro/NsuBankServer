@@ -50,8 +50,8 @@ public class CreditsTable {
         this.id = creditTableId;
     }
 
-    @OneToMany
-    @LazyCollection(LazyCollectionOption.TRUE)
+    // Todo use LAZY
+    @OneToMany(fetch = FetchType.EAGER)
     private Set<Payment> payment;
 
     private double expectedPayout;

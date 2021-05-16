@@ -24,25 +24,12 @@ public class Payment {
     @NonNull
     private Client client;
 
-    @Column(nullable = false)
-    @NonNull
-    private ZonedDateTime timestamp;
-
     @OneToOne
     @NonNull
     private Credit credit;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(nullable = false)
     @NonNull
-    private PaymentType type;
+    @Embedded
+    private PaymentDetails paymentDetails;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(nullable = false)
-    @NonNull
-    private PaymentChannel channel;
-
-    @Column(nullable = false)
-    @NonNull
-    private Double paymentSum;
 }
