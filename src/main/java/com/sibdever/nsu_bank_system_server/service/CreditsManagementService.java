@@ -89,7 +89,7 @@ public class CreditsManagementService {
         double sum = calculatePaymentsSum(payments);
         double fee = calculateSummaryFee(payments);
         var timetableRowsToCalculate =
-                creditTableRepo.findAllByCreditIdWhereDateAfterOrEquals(credit.getId(), afterTime);
+                creditTableRepo.findAllByCreditIdAndDateAfter(credit.getId(), afterTime);
 
         var currentMonthRow = timetableRowsToCalculate.get(0);
 

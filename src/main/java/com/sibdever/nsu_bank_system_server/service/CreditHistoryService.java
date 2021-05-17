@@ -22,18 +22,18 @@ public class CreditHistoryService {
 
     // History
     public List<CreditHistory> getCreditHistory(int creditId) {
-        return creditHistoryRepo.findAllByCreditId(creditId);
+        return creditHistoryRepo.findAllByCredit_IdOrderByTimestamp(creditId);
     }
 
     public Map<Credit, List<CreditHistory>> getAllCreditsHistoryForClient(int clientId) {
-        return creditHistoryRepo.findAllForClient(clientId)
+        return creditHistoryRepo.findAllByClient_IdOrderByTimestamp(clientId)
                 .stream()
                 .collect(Collectors.groupingBy(CreditHistory::getCredit));
     }
 
     // Credit table
     public List<CreditsTable> getCreditTableForCredit(int creditId) {
-        return creditTableRepo.findAllByCreditId(creditId);
+        return creditTableRepo.findAllById_Credit_Id(creditId);
     }
 
     public Map<Credit, List<CreditsTable>> getAllCreditTablesForClient(int clientId) {

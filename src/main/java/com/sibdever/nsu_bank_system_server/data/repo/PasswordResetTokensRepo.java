@@ -7,8 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PasswordResetTokensRepo extends JpaRepository<PasswordResetTokens, Operator> {
-
-//    @Query(value = "select tokens.operator from PasswordResetTokens tokens where tokens.resetToken = ?1")
-//    List<Operator> findByValue(String token);
     PasswordResetTokens findFirstByResetToken(String resetToken);
 }

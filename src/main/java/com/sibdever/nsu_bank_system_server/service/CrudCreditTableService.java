@@ -19,7 +19,7 @@ public class CrudCreditTableService {
     }
 
     public List<CreditsTable> findByCreditId(int id) {
-        return repo.findAllByCreditId(id);
+        return repo.findAllById_Credit_Id(id);
     }
 
 }
