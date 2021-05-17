@@ -1,11 +1,9 @@
 package com.sibdever.nsu_bank_system_server.data.repo;
 
-import com.sibdever.nsu_bank_system_server.data.model.Payment;
-import com.sibdever.nsu_bank_system_server.data.model.PaymentChannel;
-import com.sibdever.nsu_bank_system_server.data.model.PaymentType;
+import com.sibdever.nsu_bank_system_server.data.model.entities.Payment;
+import com.sibdever.nsu_bank_system_server.data.model.entities.PaymentChannel;
+import com.sibdever.nsu_bank_system_server.data.model.entities.PaymentType;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.sibdever.nsu_bank_system_server.controller;
 
-import com.sibdever.nsu_bank_system_server.data.model.Payment;
+import com.sibdever.nsu_bank_system_server.data.model.entities.Payment;
 import com.sibdever.nsu_bank_system_server.data.model.request.PaymentRequest;
 import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import com.sibdever.nsu_bank_system_server.service.PaymentsManagementService;

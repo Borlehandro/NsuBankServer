@@ -1,7 +1,7 @@
 package com.sibdever.nsu_bank_system_server.service;
 
-import com.sibdever.nsu_bank_system_server.data.model.Payment;
-import com.sibdever.nsu_bank_system_server.data.model.PaymentDetails;
+import com.sibdever.nsu_bank_system_server.data.model.entities.Payment;
+import com.sibdever.nsu_bank_system_server.data.model.entities.PaymentDetails;
 import com.sibdever.nsu_bank_system_server.data.repo.ClientsRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.CreditsRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.PaymentsRepo;

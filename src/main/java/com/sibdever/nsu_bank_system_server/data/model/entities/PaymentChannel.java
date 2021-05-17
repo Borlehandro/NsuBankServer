@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.data.model;
+package com.sibdever.nsu_bank_system_server.data.model.entities;
 
 public enum PaymentChannel {
     BANK_ACCOUNT(0), CREDIT_CARD(1), YOO_MONEY(3), QIWI(3);

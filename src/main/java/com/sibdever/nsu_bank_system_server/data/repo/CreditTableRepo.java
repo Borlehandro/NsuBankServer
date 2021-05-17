@@ -1,7 +1,7 @@
 package com.sibdever.nsu_bank_system_server.data.repo;
 
-import com.sibdever.nsu_bank_system_server.data.model.CreditTableId;
-import com.sibdever.nsu_bank_system_server.data.model.CreditsTable;
+import com.sibdever.nsu_bank_system_server.data.model.entities.CreditTableId;
+import com.sibdever.nsu_bank_system_server.data.model.entities.CreditsTable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

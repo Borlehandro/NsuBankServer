@@ -1,6 +1,6 @@
 package com.sibdever.nsu_bank_system_server.service;
 
-import com.sibdever.nsu_bank_system_server.data.model.CreditsTable;
+import com.sibdever.nsu_bank_system_server.data.model.entities.CreditsTable;
 import com.sibdever.nsu_bank_system_server.data.repo.CreditTableRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

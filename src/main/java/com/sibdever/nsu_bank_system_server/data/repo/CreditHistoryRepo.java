@@ -1,6 +1,6 @@
 package com.sibdever.nsu_bank_system_server.data.repo;
 
-import com.sibdever.nsu_bank_system_server.data.model.CreditHistory;
+import com.sibdever.nsu_bank_system_server.data.model.entities.CreditHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

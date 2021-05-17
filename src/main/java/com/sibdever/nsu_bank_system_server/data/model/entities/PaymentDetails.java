@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.data.model;
+package com.sibdever.nsu_bank_system_server.data.model.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

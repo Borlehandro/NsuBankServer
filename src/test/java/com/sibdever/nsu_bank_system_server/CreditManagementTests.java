@@ -1,16 +1,13 @@
 package com.sibdever.nsu_bank_system_server;
 
-import com.sibdever.nsu_bank_system_server.data.model.*;
+import com.sibdever.nsu_bank_system_server.data.model.entities.*;
 import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import com.sibdever.nsu_bank_system_server.service.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.TestPropertySource;
 
 import javax.transaction.Transactional;
 import java.time.temporal.ChronoUnit;

@@ -1,6 +1,6 @@
 package com.sibdever.nsu_bank_system_server;
 
-import com.sibdever.nsu_bank_system_server.data.model.*;
+import com.sibdever.nsu_bank_system_server.data.model.entities.*;
 import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import com.sibdever.nsu_bank_system_server.service.*;
 import org.junit.jupiter.api.BeforeAll;

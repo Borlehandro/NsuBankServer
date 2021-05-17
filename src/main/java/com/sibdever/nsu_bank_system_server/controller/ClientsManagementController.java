@@ -1,6 +1,6 @@
 package com.sibdever.nsu_bank_system_server.controller;
 
-import com.sibdever.nsu_bank_system_server.data.model.Credit;
+import com.sibdever.nsu_bank_system_server.data.model.entities.Credit;
 import com.sibdever.nsu_bank_system_server.data.model.request.ClientLockRequest;
 import com.sibdever.nsu_bank_system_server.data.model.request.GiveCreditRequest;
 import com.sibdever.nsu_bank_system_server.data.model.request.SetOfferRequest;

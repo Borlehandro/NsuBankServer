@@ -1,6 +1,6 @@
 package com.sibdever.nsu_bank_system_server;
 
-import com.sibdever.nsu_bank_system_server.data.model.*;
+import com.sibdever.nsu_bank_system_server.data.model.entities.*;
 import com.sibdever.nsu_bank_system_server.data.repo.ClientsRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.CreditsRepo;
 import com.sibdever.nsu_bank_system_server.service.ClientsManagementService;
@@ -9,9 +9,6 @@ import com.sibdever.nsu_bank_system_server.service.CrudOfferService;
 import com.sibdever.nsu_bank_system_server.service.PaymentsManagementService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;

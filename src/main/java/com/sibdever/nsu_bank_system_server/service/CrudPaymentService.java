@@ -1,8 +1,8 @@
 package com.sibdever.nsu_bank_system_server.service;
 
-import com.sibdever.nsu_bank_system_server.data.model.Payment;
-import com.sibdever.nsu_bank_system_server.data.model.PaymentChannel;
-import com.sibdever.nsu_bank_system_server.data.model.PaymentType;
+import com.sibdever.nsu_bank_system_server.data.model.entities.Payment;
+import com.sibdever.nsu_bank_system_server.data.model.entities.PaymentChannel;
+import com.sibdever.nsu_bank_system_server.data.model.entities.PaymentType;
 import com.sibdever.nsu_bank_system_server.data.repo.PaymentsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.sibdever.nsu_bank_system_server.controller.crud;
 
-import com.sibdever.nsu_bank_system_server.data.model.Offer;
+import com.sibdever.nsu_bank_system_server.data.model.entities.Offer;
 import com.sibdever.nsu_bank_system_server.service.CrudOfferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

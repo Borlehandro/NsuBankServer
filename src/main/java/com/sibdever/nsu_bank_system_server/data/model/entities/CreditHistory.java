@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.data.model;
+package com.sibdever.nsu_bank_system_server.data.model.entities;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,26 +9,28 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "credits_history")
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
-public class ClientLocking {
+public class CreditHistory {
 
     @Id
-    @Column(name = "client_id")
+    @GeneratedValue
     private int id;
 
     @OneToOne
-    @JoinColumn(name = "client_id")
-    @MapsId
     @NonNull
     private Client client;
 
-    @Column(nullable = false)
+    @OneToOne
     @NonNull
-    private LocalDateTime lockingBegin;
+    private Credit credit;
 
-    @Column(nullable = false)
     @NonNull
-    private LocalDateTime lockingEnd;
+    private CreditStatus creditStatus;
+
+    @NonNull
+    private LocalDateTime timestamp;
+
 }

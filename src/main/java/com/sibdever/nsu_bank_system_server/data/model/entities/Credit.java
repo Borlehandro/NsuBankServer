@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.data.model;
+package com.sibdever.nsu_bank_system_server.data.model.entities;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -6,7 +6,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "credits")

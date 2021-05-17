@@ -1,7 +1,7 @@
 package com.sibdever.nsu_bank_system_server.service;
 
-import com.sibdever.nsu_bank_system_server.data.model.Credit;
-import com.sibdever.nsu_bank_system_server.data.model.Payment;
+import com.sibdever.nsu_bank_system_server.data.model.entities.Credit;
+import com.sibdever.nsu_bank_system_server.data.model.entities.Payment;
 import com.sibdever.nsu_bank_system_server.data.repo.CreditsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;

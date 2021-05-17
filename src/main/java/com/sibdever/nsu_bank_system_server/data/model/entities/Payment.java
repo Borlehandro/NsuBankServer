@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.data.model;
+package com.sibdever.nsu_bank_system_server.data.model.entities;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -6,17 +6,16 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "credits_history")
+@Table(name = "payments")
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
-public class CreditHistory {
+public class Payment {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     @OneToOne
@@ -28,9 +27,7 @@ public class CreditHistory {
     private Credit credit;
 
     @NonNull
-    private CreditStatus creditStatus;
-
-    @NonNull
-    private LocalDateTime timestamp;
+    @Embedded
+    private PaymentDetails paymentDetails;
 
 }

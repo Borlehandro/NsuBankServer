@@ -1,6 +1,6 @@
 package com.sibdever.nsu_bank_system_server.service;
 
-import com.sibdever.nsu_bank_system_server.data.model.*;
+import com.sibdever.nsu_bank_system_server.data.model.entities.*;
 import com.sibdever.nsu_bank_system_server.data.repo.ClientLocksRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.ClientsRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.CrudOffersRepo;

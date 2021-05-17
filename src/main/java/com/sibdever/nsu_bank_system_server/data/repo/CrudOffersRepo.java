@@ -1,6 +1,6 @@
 package com.sibdever.nsu_bank_system_server.data.repo;
 
-import com.sibdever.nsu_bank_system_server.data.model.Offer;
+import com.sibdever.nsu_bank_system_server.data.model.entities.Offer;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
