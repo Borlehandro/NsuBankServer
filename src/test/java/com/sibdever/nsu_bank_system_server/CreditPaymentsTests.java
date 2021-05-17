@@ -20,10 +20,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(value = "SpringBootTest.WebEnvironment.MOCK", classes = NsuBankSystemServerApplication.class)
-@AutoConfigureMockMvc
-@TestPropertySource(locations = "classpath:integration-test.properties")
-class NsuBankSystemServerApplicationTests {
+class CreditPaymentsTests extends ApplicationTests {
 
 	@Autowired
 	private ClientsRepo clientsRepo;
@@ -65,7 +62,5 @@ class NsuBankSystemServerApplicationTests {
 		assertTrue(creditPayments.get(credit[0]).contains(payments[1]));
 		assertEquals(1, creditPayments.get(credit[0]).size());
 	}
-
-
 
 }

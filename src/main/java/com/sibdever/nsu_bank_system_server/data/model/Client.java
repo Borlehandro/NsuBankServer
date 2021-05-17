@@ -1,19 +1,23 @@
 package com.sibdever.nsu_bank_system_server.data.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.annotation.ObjectIdGenerator;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Data
+@Table(name = "clients")
+@Getter
+@Setter
+@ToString(exclude = "activeCredit")
+@EqualsAndHashCode(exclude = "activeCredit")
 @NoArgsConstructor
 @RequiredArgsConstructor
-@Table(name = "clients")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Client implements Serializable {
 
     @Id
@@ -26,4 +30,7 @@ public class Client implements Serializable {
 
     @OneToOne
     private Offer offer;
+
+    @OneToOne
+    private Credit activeCredit;
 }

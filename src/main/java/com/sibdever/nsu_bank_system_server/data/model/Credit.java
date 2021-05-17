@@ -1,9 +1,8 @@
 package com.sibdever.nsu_bank_system_server.data.model;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -11,8 +10,12 @@ import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "credits")
-@Data
+@Getter
+@Setter
+@ToString(exclude = "client")
+@EqualsAndHashCode(exclude = {"client", "startDate"})
 @NoArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Credit {
 
     public Credit(@NonNull Client client,

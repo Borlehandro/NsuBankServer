@@ -24,4 +24,17 @@ public interface CreditTableRepo extends CrudRepository<CreditsTable, CreditTabl
             @Param("credit_id") int creditId,
             @Param("after_time") LocalDateTime dateTime
     );
+
+    @Query("""
+    select credit_table.id.credit, credit_table from CreditsTable credit_table
+        where credit_table.id.credit.client.id = :client_id
+    """)
+    List<Object[]> findAllByClientId(@Param("client_id") int clientId);
+
+    @Query("""
+    select credit_table from CreditsTable credit_table
+        join Client client
+            on (credit_table.id.credit.id = client.activeCredit.id and client.id = :client_id)
+    """)
+    List<CreditsTable> findAllByClientIdIsActive(@Param("client_id") int clientId);
 }

@@ -19,10 +19,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(value = "SpringBootTest.WebEnvironment.MOCK", classes = NsuBankSystemServerApplication.class)
-@AutoConfigureMockMvc
-@TestPropertySource(locations = "classpath:integration-test.properties")
-public class CreditTableRecalculationTests {
+public class CreditManagementTests extends ApplicationTests {
 
     private static Client testClient;
     private static Credit testCredit;
@@ -35,6 +32,8 @@ public class CreditTableRecalculationTests {
     private CrudCreditTableService creditTableService;
     @Autowired
     private CrudCreditService creditService;
+    @Autowired
+    private CreditHistoryService creditHistoryService;
 
     @BeforeAll
     @Rollback(false)
@@ -110,5 +109,12 @@ public class CreditTableRecalculationTests {
         assertEquals(CreditStatus.CLOSED, updatedTable.get(0).getCreditStatusAfterPayment());
         assertEquals(CreditStatus.CLOSED, creditService.findById(testCredit.getId()).getStatus());
         assertEquals(1, updatedTable.size());
+
+        var history = creditHistoryService.getCreditHistory(testCredit.getId());
+        history.sort(Comparator.comparing(CreditHistory::getTimestamp));
+        assertEquals(2, history.size());
+        assertEquals(CreditStatus.ACTIVE, history.get(0).getCreditStatus());
+        assertEquals(CreditStatus.CLOSED, history.get(1).getCreditStatus());
+        assertNull(testClient.getActiveCredit());
     }
 }

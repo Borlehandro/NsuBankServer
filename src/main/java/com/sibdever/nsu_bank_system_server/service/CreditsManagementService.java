@@ -1,9 +1,7 @@
 package com.sibdever.nsu_bank_system_server.service;
 
 import com.sibdever.nsu_bank_system_server.data.model.*;
-import com.sibdever.nsu_bank_system_server.data.repo.CreditTableRepo;
-import com.sibdever.nsu_bank_system_server.data.repo.CreditsRepo;
-import com.sibdever.nsu_bank_system_server.data.repo.PaymentsRepo;
+import com.sibdever.nsu_bank_system_server.data.repo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +18,13 @@ public class CreditsManagementService {
     @Autowired
     private CreditsRepo creditsRepo;
     @Autowired
+    private ClientsRepo clientsRepo;
+    @Autowired
     private CreditTableRepo creditTableRepo;
     @Autowired
     private PaymentsRepo paymentsRepo;
+    @Autowired
+    private CreditHistoryRepo creditHistoryRepo;
 
     // Caller method is Transactional
     public Credit giveCredit(Client client, Offer offer, int monthPeriod, double sum, PaymentChannel payTo) {
@@ -35,7 +37,10 @@ public class CreditsManagementService {
                 sum + sum * (payTo.getFeePercents() / 100d),
                 offer);
 
-        var creditRes = creditsRepo.saveAndFlush(credit);
+        credit = creditsRepo.saveAndFlush(credit);
+        client.setActiveCredit(credit);
+        clientsRepo.saveAndFlush(client);
+        creditHistoryRepo.save(new CreditHistory(client, credit, CreditStatus.ACTIVE, credit.getStartDate()));
         paymentsRepo.save(new Payment(client, credit, new PaymentDetails(credit.getStartDate(), PaymentType.RELEASE, payTo, sum)));
 
         var finalTime = credit.getStartDate().plus(monthPeriod, ChronoUnit.MONTHS);
@@ -59,7 +64,7 @@ public class CreditsManagementService {
                     Math.abs(currentBalance) < 0.01d ? CreditStatus.CLOSED : CreditStatus.ACTIVE
             ));
         }
-        return creditRes;
+        return credit;
     }
 
     // Caller method is Transactional
@@ -75,12 +80,10 @@ public class CreditsManagementService {
             row.setExpectedPayout(monthPayout);
             row.setBalanceAfterPayment(currentBalance);
             row.setCreditStatusAfterPayment(Math.abs(currentBalance) < 0.01d ? CreditStatus.CLOSED : CreditStatus.ACTIVE);
-
         }
     }
 
     // Caller method is Transactional
-    // Todo calculate fee!
     public void recalculateCreditTableWithDailyPayments(Credit credit, Set<Payment> payments) {
         var afterTime = payments.stream().findFirst().get().getPaymentDetails().getTimestamp();
         double sum = calculatePaymentsSum(payments);
@@ -111,8 +114,24 @@ public class CreditsManagementService {
         currentMonthRow.setBalanceAfterPayment(credit.getBalance() - paymentOfDebt + fee);
         credit.setBalance(credit.getBalance() - paymentOfDebt + fee);
         if (Math.abs(credit.getBalance()) < 0.01d) {
+            // Pay back if overpay
+            if(credit.getBalance() < 0) {
+                paymentsRepo.save(
+                        new Payment(
+                                credit.getClient(),
+                                credit,
+                                new PaymentDetails(
+                                        LocalDateTime.now(),
+                                        PaymentType.RELEASE,
+                                        PaymentChannel.BANK_ACCOUNT,
+                                        Math.abs(credit.getBalance())
+                                )
+                        )
+                );
+            }
             credit.setStatus(CreditStatus.CLOSED);
-            creditsRepo.flush();
+            credit.getClient().setActiveCredit(null);
+            creditHistoryRepo.save(new CreditHistory(credit.getClient(), credit, CreditStatus.CLOSED, LocalDateTime.now()));
             currentMonthRow.setCreditStatusAfterPayment(CreditStatus.CLOSED);
             creditTableRepo.deleteAll(timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()));
         } else {
