@@ -1,5 +1,6 @@
 package com.sibdever.nsu_bank_system_server.service;
 
+import com.sibdever.nsu_bank_system_server.data.ClientStatus;
 import com.sibdever.nsu_bank_system_server.data.model.entities.*;
 import com.sibdever.nsu_bank_system_server.data.repo.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +114,9 @@ public class CreditsManagementService {
         currentMonthRow.setFee(fee);
         currentMonthRow.setBalanceAfterPayment(credit.getBalance() - paymentOfDebt + fee);
         credit.setBalance(credit.getBalance() - paymentOfDebt + fee);
+        credit.setCashInflow(credit.getCashInflow() + sum - fee);
+        credit.setProfitMargin(credit.getCashInflow() / credit.getSum());
+        creditsRepo.saveAndFlush(credit);
         if (Math.abs(credit.getBalance()) < 0.01d) {
             // Pay back if overpay
             if(credit.getBalance() < 0) {
@@ -131,6 +135,12 @@ public class CreditsManagementService {
             }
             credit.setStatus(CreditStatus.CLOSED);
             credit.getClient().setActiveCredit(null);
+            if(!credit.getClient().getClientStatus().equals(ClientStatus.BLOCKED)) {
+                if(credit.getClient().getOffer() != null)
+                    credit.getClient().setClientStatus(ClientStatus.OFFERED_WITHOUT_CREDIT);
+                else
+                    credit.getClient().setClientStatus(ClientStatus.WITHOUT_OFFER);
+            }
             creditHistoryRepo.save(new CreditHistory(credit.getClient(), credit, CreditStatus.CLOSED, LocalDateTime.now()));
             currentMonthRow.setCreditStatusAfterPayment(CreditStatus.CLOSED);
             creditTableRepo.deleteAll(timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()));

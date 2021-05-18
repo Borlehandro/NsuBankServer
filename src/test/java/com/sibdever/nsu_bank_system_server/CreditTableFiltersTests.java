@@ -1,16 +1,15 @@
 package com.sibdever.nsu_bank_system_server;
 
 
-import com.sibdever.nsu_bank_system_server.data.filtering.CreditTableCriteriaKey;
-import com.sibdever.nsu_bank_system_server.data.filtering.CreditTableSearchCriteria;
-import com.sibdever.nsu_bank_system_server.data.filtering.CreditsTableSpecification;
-import com.sibdever.nsu_bank_system_server.data.filtering.CreditTableCriteriaOperator;
+import com.sibdever.nsu_bank_system_server.data.filtering.credits_table.CreditTableCriteriaKey;
+import com.sibdever.nsu_bank_system_server.data.filtering.credits_table.CreditTableSearchCriteria;
+import com.sibdever.nsu_bank_system_server.data.filtering.credits_table.CreditsTableSpecification;
+import com.sibdever.nsu_bank_system_server.data.filtering.CriteriaOperator;
 import com.sibdever.nsu_bank_system_server.data.model.entities.Client;
 import com.sibdever.nsu_bank_system_server.data.model.entities.Offer;
 import com.sibdever.nsu_bank_system_server.data.model.entities.PaymentChannel;
 import com.sibdever.nsu_bank_system_server.data.repo.ClientsRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.CreditTableRepo;
-import com.sibdever.nsu_bank_system_server.data.repo.CreditsRepo;
 import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import com.sibdever.nsu_bank_system_server.service.ClientsManagementService;
 import com.sibdever.nsu_bank_system_server.service.CrudClientService;
@@ -64,21 +63,21 @@ public class CreditTableFiltersTests extends ApplicationTests {
         var creditsTableSpecification1 = new CreditsTableSpecification(
                 new CreditTableSearchCriteria(
                         CreditTableCriteriaKey.CREDIT_SUM,
-                        CreditTableCriteriaOperator.EQUALS,
+                        CriteriaOperator.EQUALS,
                         50000.0
                 )
         );
         var creditsTableSpecification2 = new CreditsTableSpecification(
                 new CreditTableSearchCriteria(
                         CreditTableCriteriaKey.CREDIT_SUM,
-                        CreditTableCriteriaOperator.GREATER,
+                        CriteriaOperator.GREATER,
                         9000.0
                 )
         );
         var creditsTableSpecification3 = new CreditsTableSpecification(
                 new CreditTableSearchCriteria(
                         CreditTableCriteriaKey.CREDIT_SUM,
-                        CreditTableCriteriaOperator.GREATER_OR_EQUALS,
+                        CriteriaOperator.GREATER_OR_EQUALS,
                         9000.0
                 )
         );
@@ -116,21 +115,21 @@ public class CreditTableFiltersTests extends ApplicationTests {
         var specification1 = new CreditsTableSpecification(
                 new CreditTableSearchCriteria(
                         CreditTableCriteriaKey.CREDIT_SUM,
-                        CreditTableCriteriaOperator.EQUALS,
+                        CriteriaOperator.EQUALS,
                         50000.0
                 )
         );
         var specification2 = new CreditsTableSpecification(
                 new CreditTableSearchCriteria(
                         CreditTableCriteriaKey.CREDIT_MONTH,
-                        CreditTableCriteriaOperator.EQUALS,
+                        CriteriaOperator.EQUALS,
                         12
                 )
         );
         var specification3 = new CreditsTableSpecification(
                 new CreditTableSearchCriteria(
                         CreditTableCriteriaKey.TABLE_DATE,
-                        CreditTableCriteriaOperator.GREATER,
+                        CriteriaOperator.GREATER,
                         credit1.getStartDate().plus(1, ChronoUnit.MONTHS)
                 )
         );

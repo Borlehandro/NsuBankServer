@@ -3,6 +3,7 @@ package com.sibdever.nsu_bank_system_server.data.model.entities;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -50,6 +51,10 @@ public class Credit {
     private int monthPeriod;
 
     private double sum;
+
+    private double cashInflow = 0.0;
+
+    private double profitMargin;
 
     private double balance;
 

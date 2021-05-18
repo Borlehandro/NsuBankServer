@@ -1,6 +1,7 @@
 package com.sibdever.nsu_bank_system_server;
 
 import com.sibdever.nsu_bank_system_server.data.model.entities.*;
+import com.sibdever.nsu_bank_system_server.data.repo.CreditsRepo;
 import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import com.sibdever.nsu_bank_system_server.service.*;
 import org.junit.jupiter.api.Assertions;
@@ -29,6 +30,8 @@ public class CreditManagementTests extends ApplicationTests {
     private CrudCreditTableService creditTableService;
     @Autowired
     private CrudCreditService creditService;
+    @Autowired
+    private CreditsRepo creditsRepo;
     @Autowired
     private CreditHistoryService creditHistoryService;
 
@@ -82,6 +85,12 @@ public class CreditManagementTests extends ApplicationTests {
                     assertTrue(Math.abs(item.getExpectedPayout() - 890.0) < 1);
                 }
         );
+        // Todo fix this refresh
+        var updatedCredit = creditsRepo.findById(testCredit.getId()).get();
+        System.out.println(updatedCredit.getCashInflow());
+        System.out.println(updatedCredit.getProfitMargin());
+        assertEquals(970.0, updatedCredit.getCashInflow());
+        assertEquals(970.0 / updatedCredit.getSum(), updatedCredit.getProfitMargin());
     }
 
     @Test

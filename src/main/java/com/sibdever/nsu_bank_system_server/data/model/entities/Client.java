@@ -2,6 +2,7 @@ package com.sibdever.nsu_bank_system_server.data.model.entities;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.sibdever.nsu_bank_system_server.data.ClientStatus;
 import lombok.*;
 
 import javax.persistence.*;
@@ -31,4 +32,9 @@ public class Client implements Serializable {
 
     @OneToOne
     private Credit activeCredit;
+
+    @Enumerated(EnumType.ORDINAL)
+    @Column(nullable = false)
+    @NonNull
+    private ClientStatus clientStatus = ClientStatus.WITHOUT_OFFER;
 }
