@@ -1,4 +1,4 @@
-package com.sibdever.nsu_bank_system_server.data.filtering.credits_table;
+package com.sibdever.nsu_bank_system_server.data.filtering.credit_table;
 
 import com.sibdever.nsu_bank_system_server.data.filtering.CriteriaOperator;
 import lombok.*;

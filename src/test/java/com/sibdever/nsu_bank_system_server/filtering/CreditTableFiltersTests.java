@@ -1,9 +1,10 @@
-package com.sibdever.nsu_bank_system_server;
+package com.sibdever.nsu_bank_system_server.filtering;
 
 
-import com.sibdever.nsu_bank_system_server.data.filtering.credits_table.CreditTableCriteriaKey;
-import com.sibdever.nsu_bank_system_server.data.filtering.credits_table.CreditTableSearchCriteria;
-import com.sibdever.nsu_bank_system_server.data.filtering.credits_table.CreditsTableSpecification;
+import com.sibdever.nsu_bank_system_server.ApplicationTests;
+import com.sibdever.nsu_bank_system_server.data.filtering.credit_table.CreditTableCriteriaKey;
+import com.sibdever.nsu_bank_system_server.data.filtering.credit_table.CreditTableSearchCriteria;
+import com.sibdever.nsu_bank_system_server.data.filtering.credit_table.CreditsTableSpecification;
 import com.sibdever.nsu_bank_system_server.data.filtering.CriteriaOperator;
 import com.sibdever.nsu_bank_system_server.data.model.entities.Client;
 import com.sibdever.nsu_bank_system_server.data.model.entities.Offer;
