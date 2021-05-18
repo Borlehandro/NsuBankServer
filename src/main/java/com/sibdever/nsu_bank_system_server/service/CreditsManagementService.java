@@ -69,7 +69,7 @@ public class CreditsManagementService {
     }
 
     // Caller method is Transactional
-    private void updateCreditTimetable(List<CreditsTable> rowsToUpdate, double startBalance, double monthPercent) {
+    private void updateCreditTable(List<CreditsTable> rowsToUpdate, double startBalance, double monthPercent) {
         double monthPayout = calculateMonthPayout(startBalance, monthPercent, rowsToUpdate.size());
         double currentBalance = startBalance;
         for (CreditsTable row : rowsToUpdate) {
@@ -114,25 +114,28 @@ public class CreditsManagementService {
         currentMonthRow.setFee(fee);
         currentMonthRow.setBalanceAfterPayment(credit.getBalance() - paymentOfDebt + fee);
         credit.setBalance(credit.getBalance() - paymentOfDebt + fee);
-        credit.setCashInflow(credit.getCashInflow() + sum - fee);
-        credit.setProfitMargin(credit.getCashInflow() / credit.getSum());
-        creditsRepo.saveAndFlush(credit);
-        if (Math.abs(credit.getBalance()) < 0.01d) {
+
+        if(credit.getBalance() >= 0) {
+            credit.setCashInflow(credit.getCashInflow() + sum - fee);
+        } else {
             // Pay back if overpay
-            if(credit.getBalance() < 0) {
-                paymentsRepo.save(
-                        new Payment(
-                                credit.getClient(),
-                                credit,
-                                new PaymentDetails(
-                                        LocalDateTime.now(),
-                                        PaymentType.RELEASE,
-                                        PaymentChannel.BANK_ACCOUNT,
-                                        Math.abs(credit.getBalance())
-                                )
-                        )
-                );
-            }
+            // Todo save payment with service
+            paymentsRepo.save(
+                    new Payment(
+                            credit.getClient(),
+                            credit,
+                            new PaymentDetails(
+                                    LocalDateTime.now(),
+                                    PaymentType.RELEASE,
+                                    PaymentChannel.BANK_ACCOUNT,
+                                    Math.abs(credit.getBalance())
+                            )
+                    )
+            );
+            credit.setCashInflow(credit.getCashInflow() + sum - fee - Math.abs(credit.getBalance()));
+            credit.setBalance(0.00d);
+        }
+        if (Math.abs(credit.getBalance()) < 0.01d) {
             credit.setStatus(CreditStatus.CLOSED);
             credit.getClient().setActiveCredit(null);
             if(!credit.getClient().getClientStatus().equals(ClientStatus.BLOCKED)) {
@@ -145,11 +148,13 @@ public class CreditsManagementService {
             currentMonthRow.setCreditStatusAfterPayment(CreditStatus.CLOSED);
             creditTableRepo.deleteAll(timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()));
         } else {
-            updateCreditTimetable(
+            updateCreditTable(
                     timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()),
                     credit.getBalance(),
                     credit.getOffer().getPercentsPerMonth());
         }
+        credit.setProfitMargin(credit.getCashInflow() / credit.getSum());
+        creditsRepo.saveAndFlush(credit);
     }
 
     private double calculatePaymentsSum(Set<Payment> payments) {
