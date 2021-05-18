@@ -1,15 +1,14 @@
 package com.sibdever.nsu_bank_system_server.data.filtering;
 
-import com.sibdever.nsu_bank_system_server.data.filtering.Operation;
 import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreditSearchCriteria {
-    private String fieldName;
-    private Operation operation;
+public class CreditTableSearchCriteria {
+    private CreditTableCriteriaKey key;
+    private CreditTableCriteriaOperator operator;
     private Object value;
 
 //    // Credit

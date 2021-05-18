@@ -19,13 +19,13 @@ public class Credit {
 
     public Credit(@NonNull Client client,
                   @NonNull LocalDateTime startDate,
-                  int mouthPeriod,
+                  int monthPeriod,
                   double sum,
                   double balance,
                   @NonNull Offer offer) {
         this.client = client;
         this.startDate = startDate;
-        this.mouthPeriod = mouthPeriod;
+        this.monthPeriod = monthPeriod;
         this.sum = sum;
         this.balance = balance;
         this.offer = offer;
@@ -47,7 +47,7 @@ public class Credit {
     @NonNull
     private LocalDateTime startDate;
 
-    private int mouthPeriod;
+    private int monthPeriod;
 
     private double sum;
 

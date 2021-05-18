@@ -1,7 +1,9 @@
 package com.sibdever.nsu_bank_system_server.data.repo;
 
+import com.sibdever.nsu_bank_system_server.data.model.entities.Credit;
 import com.sibdever.nsu_bank_system_server.data.model.entities.CreditTableId;
 import com.sibdever.nsu_bank_system_server.data.model.entities.CreditsTable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +13,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface CreditTableRepo extends CrudRepository<CreditsTable, CreditTableId> {
+public interface CreditTableRepo extends CrudRepository<CreditsTable, CreditTableId>,
+        JpaSpecificationExecutor<CreditsTable> {
     List<CreditsTable> findAllById_Credit_Id(int id);
 
     @Query("""
