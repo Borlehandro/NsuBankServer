@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -26,6 +27,8 @@ public class CreditsManagementService {
     private PaymentsRepo paymentsRepo;
     @Autowired
     private CreditHistoryRepo creditHistoryRepo;
+    @Autowired
+    private DayStatisticRepo dayStatisticRepo;
 
     // Caller method is Transactional
     public Credit giveCredit(Client client, Offer offer, int monthPeriod, double sum, PaymentChannel payTo) {
@@ -85,7 +88,7 @@ public class CreditsManagementService {
     }
 
     // Caller method is Transactional
-    public void recalculateCreditTableWithDailyPayments(Credit credit, Set<Payment> payments) {
+    public void recalculateCreditTableWithDailyPayments(Credit credit, Set<Payment> payments, LocalDate currentDay) {
         var afterTime = payments.stream().findFirst().get().getPaymentDetails().getTimestamp();
         double sum = calculatePaymentsSum(payments);
         double fee = calculateSummaryFee(payments);
@@ -98,62 +101,71 @@ public class CreditsManagementService {
 
         if (previousPayments != null) {
             if (!previousPayments.isEmpty())
-                sum += currentMonthRow.getExpectedPayout();
+                sum += currentMonthRow.getRealPayout();
             previousPayments.addAll(payments);
         } else currentMonthRow.setPayment(payments);
 
-        currentMonthRow.setExpectedPayout(sum);
+        currentMonthRow.setRealPayout(sum - fee);
 
-        double paymentOfPercents =
-                calculatePaymentOfPercents(credit.getOffer().getPercentsPerMonth(), credit.getBalance());
+        // Recalculate future table rows
+        if (currentMonthRow.getRealPayout() >= currentMonthRow.getExpectedPayout()) {
+            currentMonthRow.setExpectedPayout(sum);
 
-        double paymentOfDebt = calculatePaymentOfDebt(sum, paymentOfPercents);
+            double paymentOfPercents =
+                    calculatePaymentOfPercents(credit.getOffer().getPercentsPerMonth(), credit.getBalance());
 
-        currentMonthRow.setPaymentOfPercents(paymentOfPercents);
-        currentMonthRow.setPaymentOfDebt(paymentOfDebt);
-        currentMonthRow.setFee(fee);
-        currentMonthRow.setBalanceAfterPayment(credit.getBalance() - paymentOfDebt + fee);
-        credit.setBalance(credit.getBalance() - paymentOfDebt + fee);
+            double paymentOfDebt = calculatePaymentOfDebt(sum, paymentOfPercents);
 
-        if(credit.getBalance() >= 0) {
-            credit.setCashInflow(credit.getCashInflow() + sum - fee);
-        } else {
-            // Pay back if overpay
-            // Todo save payment with service
-            paymentsRepo.save(
-                    new Payment(
-                            credit.getClient(),
-                            credit,
-                            new PaymentDetails(
-                                    LocalDateTime.now(),
-                                    PaymentType.RELEASE,
-                                    PaymentChannel.BANK_ACCOUNT,
-                                    Math.abs(credit.getBalance())
-                            )
-                    )
-            );
-            credit.setCashInflow(credit.getCashInflow() + sum - fee - Math.abs(credit.getBalance()));
-            credit.setBalance(0.00d);
-        }
-        if (Math.abs(credit.getBalance()) < 0.01d) {
-            credit.setStatus(CreditStatus.CLOSED);
-            credit.getClient().setActiveCredit(null);
-            if(!credit.getClient().getClientStatus().equals(ClientStatus.BLOCKED)) {
-                if(credit.getClient().getOffer() != null)
-                    credit.getClient().setClientStatus(ClientStatus.OFFERED_WITHOUT_CREDIT);
-                else
-                    credit.getClient().setClientStatus(ClientStatus.WITHOUT_OFFER);
+            currentMonthRow.setPaymentOfPercents(paymentOfPercents);
+            currentMonthRow.setPaymentOfDebt(paymentOfDebt);
+            currentMonthRow.setFee(fee);
+            currentMonthRow.setBalanceAfterPayment(credit.getBalance() - paymentOfDebt + fee);
+            credit.setBalance(credit.getBalance() - paymentOfDebt + fee);
+
+            if (credit.getBalance() >= 0) {
+                credit.setCashInflow(credit.getCashInflow() + sum - fee);
+            } else {
+                // Pay back if overpay
+                // Todo save payment with service
+                paymentsRepo.save(
+                        new Payment(
+                                credit.getClient(),
+                                credit,
+                                new PaymentDetails(
+                                        LocalDateTime.now(),
+                                        PaymentType.RELEASE,
+                                        PaymentChannel.BANK_ACCOUNT,
+                                        Math.abs(credit.getBalance())
+                                )
+                        )
+                );
+                credit.setCashInflow(credit.getCashInflow() + sum - fee - Math.abs(credit.getBalance()));
+                credit.setBalance(0.00d);
             }
-            creditHistoryRepo.save(new CreditHistory(credit.getClient(), credit, CreditStatus.CLOSED, LocalDateTime.now()));
-            currentMonthRow.setCreditStatusAfterPayment(CreditStatus.CLOSED);
-            creditTableRepo.deleteAll(timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()));
+            if (Math.abs(credit.getBalance()) < 0.01d) {
+                credit.setStatus(CreditStatus.CLOSED);
+                credit.getClient().setActiveCredit(null);
+                if (!credit.getClient().getClientStatus().equals(ClientStatus.BLOCKED)) {
+                    if (credit.getClient().getOffer() != null)
+                        credit.getClient().setClientStatus(ClientStatus.OFFERED_WITHOUT_CREDIT);
+                    else
+                        credit.getClient().setClientStatus(ClientStatus.WITHOUT_OFFER);
+                }
+                creditHistoryRepo.save(new CreditHistory(credit.getClient(), credit, CreditStatus.CLOSED, LocalDateTime.now()));
+                currentMonthRow.setCreditStatusAfterPayment(CreditStatus.CLOSED);
+                creditTableRepo.deleteAll(timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()));
+            } else {
+                updateCreditTable(
+                        timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()),
+                        credit.getBalance(),
+                        credit.getOffer().getPercentsPerMonth());
+            }
         } else {
-            updateCreditTable(
-                    timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()),
-                    credit.getBalance(),
-                    credit.getOffer().getPercentsPerMonth());
+            credit.setCashInflow(credit.getCashInflow() + sum - fee);
+            currentMonthRow.setFee(fee);
         }
         credit.setProfitMargin(credit.getCashInflow() / credit.getSum());
+        dayStatisticRepo.save(new DayStatistic(currentDay, credit.getCashInflow(), credit.getProfitMargin(), credit));
         creditsRepo.saveAndFlush(credit);
     }
 

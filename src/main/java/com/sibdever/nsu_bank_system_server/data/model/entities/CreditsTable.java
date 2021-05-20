@@ -74,6 +74,8 @@ public class CreditsTable {
 
     private double balanceAfterPayment;
 
+    private double realPayout;
+
     private double fee;
 
     @Enumerated(EnumType.ORDINAL)

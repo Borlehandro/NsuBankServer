@@ -26,18 +26,23 @@ public class DailyScheduledService {
     @Transactional
     public void manageDailyPayments() {
 
-        var creditPayments  = creditsRepo
+        var creditPayments = creditsRepo
                 .findAllJoinPaymentsAfterTime(lastLaunch)
                 .stream()
                 .collect(Collectors.groupingBy(
-                        (Object[] item) -> (Credit)item[0],
-                        Collectors.mapping((Object[] item) -> (Payment)item[1], Collectors.toSet())
+                        (Object[] item) -> (Credit) item[0],
+                        Collectors.mapping((Object[] item) -> (Payment) item[1], Collectors.toSet())
                 ));
 
-        creditPayments.keySet().forEach(credit ->
-                creditsManagementService.recalculateCreditTableWithDailyPayments(credit, creditPayments.get(credit)));
-
         lastLaunch = LocalDateTime.now();
+
+        creditPayments.keySet().forEach(credit ->
+                creditsManagementService.recalculateCreditTableWithDailyPayments(
+                        credit,
+                        creditPayments.get(credit),
+                        lastLaunch.toLocalDate()
+                )
+        );
     }
 
 }

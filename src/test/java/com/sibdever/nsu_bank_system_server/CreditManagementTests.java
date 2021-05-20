@@ -2,6 +2,7 @@ package com.sibdever.nsu_bank_system_server;
 
 import com.sibdever.nsu_bank_system_server.data.model.entities.*;
 import com.sibdever.nsu_bank_system_server.data.repo.CreditsRepo;
+import com.sibdever.nsu_bank_system_server.data.repo.DayStatisticRepo;
 import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import com.sibdever.nsu_bank_system_server.service.*;
 import org.junit.jupiter.api.Assertions;
@@ -33,6 +34,8 @@ public class CreditManagementTests extends ApplicationTests {
     @Autowired
     private CreditsRepo creditsRepo;
     @Autowired
+    private DayStatisticRepo dayStatisticRepo;
+    @Autowired
     private CreditHistoryService creditHistoryService;
 
     @BeforeAll
@@ -54,6 +57,48 @@ public class CreditManagementTests extends ApplicationTests {
             System.out.println(row.getExpectedPayout());
             Assertions.assertTrue(row.getExpectedPayout() <= 898.0 && row.getExpectedPayout() >= 897);
         });
+    }
+
+    @Test
+    @Transactional
+    public void testSmallPayments() throws WrongCredentialsException {
+
+        var oldTable = creditTableService.findByCreditId(testCredit.getId());
+        oldTable.sort(Comparator.comparing(tableRow -> tableRow.getId().getTimestamp()));
+
+        paymentsManagementService.processPayment(
+                testClient.getId(),
+                testCredit.getId(),
+                new PaymentDetails(
+                        testCredit.getStartDate().plus(1, ChronoUnit.HOURS),
+                        PaymentType.REFUND,
+                        PaymentChannel.YOO_MONEY,
+                        100.0)
+        );
+
+        dailyScheduledService.manageDailyPayments();
+        var updatedTable = creditTableService.findByCreditId(testCredit.getId());
+        updatedTable.sort(Comparator.comparing(tableRow -> tableRow.getId().getTimestamp()));
+
+        // Test that was not recalculated
+        for (int i = 0; i < oldTable.size(); ++i) {
+            assertEquals(oldTable.get(i).getExpectedPayout(), updatedTable.get(i).getExpectedPayout());
+            assertEquals(oldTable.get(i).getPaymentOfDebt(), updatedTable.get(i).getPaymentOfDebt());
+            assertEquals(oldTable.get(i).getPaymentOfPercents(), updatedTable.get(i).getPaymentOfPercents());
+            assertEquals(oldTable.get(i).getBalanceAfterPayment(), updatedTable.get(i).getBalanceAfterPayment());
+            assertEquals(oldTable.get(i).getCreditStatusAfterPayment(), updatedTable.get(i).getCreditStatusAfterPayment());
+        }
+
+        // Test real payout, fee and profit
+        assertEquals(97.0, updatedTable.get(0).getRealPayout());
+        assertEquals(3.0, updatedTable.get(0).getFee());
+        assertEquals(97.0, updatedTable.get(0).getId().getCredit().getCashInflow());
+        assertEquals(0.0097, updatedTable.get(0).getId().getCredit().getProfitMargin());
+
+        var statistic = dayStatisticRepo.findAll();
+        assertEquals(1, statistic.size());
+        assertEquals(97.0, statistic.get(0).getCashInflow());
+        assertEquals(0.0097, statistic.get(0).getProfitMargin());
     }
 
     @Test

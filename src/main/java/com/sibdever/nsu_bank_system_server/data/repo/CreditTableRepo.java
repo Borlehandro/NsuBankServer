@@ -39,4 +39,12 @@ public interface CreditTableRepo extends CrudRepository<CreditsTable, CreditTabl
                     on (credit_table.id.credit.id = client.activeCredit.id and client.id = :client_id)
             """)
     List<CreditsTable> findAllByClientIdIsActive(@Param("client_id") int clientId);
+
+    @Query("""
+    select credit_table from CreditsTable credit_table
+        where credit_table.id.timestamp between :start_time and :end_time
+    """)
+    List<CreditsTable> findAllWhereTimestampBetween(
+            @Param("start_time") LocalDateTime startTime,
+            @Param("end_time") LocalDateTime endTime);
 }
