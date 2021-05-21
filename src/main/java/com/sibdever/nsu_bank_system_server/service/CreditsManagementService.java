@@ -117,6 +117,7 @@ public class CreditsManagementService {
         currentMonthRow.setRealPayout(sum - fee);
         currentMonthRow.setFee(fee + currentMonthRow.getFee());
 
+        // Month payment completed
         // Recalculate future table rows
         if (currentMonthRow.getRealPayout() >= currentMonthRow.getExpectedPayout()) {
             currentMonthRow.setExpectedPayout(currentMonthRow.getRealPayout());
@@ -151,6 +152,7 @@ public class CreditsManagementService {
                 credit.setCashInflow(credit.getCashInflow() + currentMonthRow.getRealPayout() - Math.abs(credit.getBalance()));
                 credit.setBalance(0.00d);
             }
+            // Close credit. If expired - it will removed.
             if (Math.abs(credit.getBalance()) < 0.01d) {
                 credit.setStatus(CreditStatus.CLOSED);
                 credit.getClient().setActiveCredit(null);
@@ -164,6 +166,13 @@ public class CreditsManagementService {
                 currentMonthRow.setCreditStatusAfterPayment(CreditStatus.CLOSED);
                 creditTableRepo.deleteAll(timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()));
             } else {
+                // Remove expired
+                if(credit.getStatus().equals(CreditStatus.EXPIRED)) {
+                    credit.setStatus(CreditStatus.ACTIVE);
+                    currentMonthRow.setCreditStatusAfterPayment(CreditStatus.ACTIVE);
+                    creditHistoryRepo.save(new CreditHistory(credit.getClient(), credit, CreditStatus.ACTIVE, LocalDateTime.now(clock)));
+                }
+
                 updateCreditTable(
                         timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()),
                         credit.getBalance(),

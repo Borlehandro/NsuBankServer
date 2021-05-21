@@ -44,6 +44,8 @@ public class CreditManagementTests extends ApplicationTests {
     private CreditTableRepo creditTableRepo;
     @Autowired
     private PaymentsRepo paymentsRepo;
+    @Autowired
+    private ClientsManagementService clientsManagementService;
 
     @BeforeAll
     @Rollback(false)
@@ -181,7 +183,7 @@ public class CreditManagementTests extends ApplicationTests {
 
     @Test
     @Transactional
-    public void testLatePayNotLastMonth() throws WrongCredentialsException, InterruptedException {
+    public void testLatePayNotLastMonth() throws WrongCredentialsException {
 
         paymentsManagementService.processPayment(
                 testClient.getId(),
@@ -229,13 +231,118 @@ public class CreditManagementTests extends ApplicationTests {
 
     @Test
     @Transactional
-    public void testLatePayLastMonth() {
-        fail();
+    public void testActiveAfterLatePay() throws WrongCredentialsException {
+        paymentsManagementService.processPayment(
+                testClient.getId(),
+                testCredit.getId(),
+                new PaymentDetails(
+                        testCredit.getStartDate(),
+                        PaymentType.REFUND,
+                        PaymentChannel.YOO_MONEY,
+                        100.0)
+        );
+
+        System.out.println("Payment time:" + paymentsRepo.findAll().get(0).getPaymentDetails().getTimestamp());
+
+        dailyScheduledService.manageDailyPayments();
+
+        var oldTable = creditTableService.findByCreditId(testCredit.getId());
+        oldTable.sort(Comparator.comparing(tableRow -> tableRow.getId().getTimestamp()));
+
+        Clock clock = Clock.fixed(
+                LocalDateTime.now().plus(1, ChronoUnit.MONTHS).toInstant(ZoneOffset.UTC),
+                ZoneId.systemDefault());
+
+        oldTable.forEach(item -> System.out.println(item.getExpectedPayout() + "  " + item.getRealPayout()));
+        System.out.println();
+
+        // June
+        dailyScheduledService.setClock(clock);
+
+        oldTable.forEach(item -> System.out.println(item.getExpectedPayout() + "  " + item.getRealPayout()));
+
+        dailyScheduledService.manageDailyPayments();
+
+        clock = Clock.fixed(
+                LocalDateTime.now().plus(2, ChronoUnit.MONTHS).toInstant(ZoneOffset.UTC),
+                ZoneId.systemDefault());
+
+        // July
+        dailyScheduledService.setClock(clock);
+
+        paymentsManagementService.processPayment(
+                testClient.getId(),
+                testCredit.getId(),
+                new PaymentDetails(
+                        testCredit.getStartDate().plus(2, ChronoUnit.MONTHS).minus(1, ChronoUnit.DAYS),
+                        PaymentType.REFUND,
+                        PaymentChannel.BANK_ACCOUNT,
+                        1000.0)
+        );
+
+        dailyScheduledService.manageDailyPayments();
+
+        var updatedCredit = creditsRepo.findById(testCredit.getId()).get();
+        var updatedTable = creditTableService.findByCreditId(testCredit.getId());
+        assertEquals(CreditStatus.ACTIVE, updatedCredit.getStatus());
+        assertEquals(12,updatedTable.size());
     }
 
     @Test
     @Transactional
-    public void testClosingAfterLatePay() {
-        fail();
+    public void testClosedAfterLatePay() throws WrongCredentialsException {
+        paymentsManagementService.processPayment(
+                testClient.getId(),
+                testCredit.getId(),
+                new PaymentDetails(
+                        testCredit.getStartDate(),
+                        PaymentType.REFUND,
+                        PaymentChannel.YOO_MONEY,
+                        100.0)
+        );
+
+        System.out.println("Payment time:" + paymentsRepo.findAll().get(0).getPaymentDetails().getTimestamp());
+
+        dailyScheduledService.manageDailyPayments();
+
+        var oldTable = creditTableService.findByCreditId(testCredit.getId());
+        oldTable.sort(Comparator.comparing(tableRow -> tableRow.getId().getTimestamp()));
+
+        Clock clock = Clock.fixed(
+                LocalDateTime.now().plus(1, ChronoUnit.MONTHS).toInstant(ZoneOffset.UTC),
+                ZoneId.systemDefault());
+
+        oldTable.forEach(item -> System.out.println(item.getExpectedPayout() + "  " + item.getRealPayout()));
+        System.out.println();
+
+        // June
+        dailyScheduledService.setClock(clock);
+
+        oldTable.forEach(item -> System.out.println(item.getExpectedPayout() + "  " + item.getRealPayout()));
+
+        dailyScheduledService.manageDailyPayments();
+
+        clock = Clock.fixed(
+                LocalDateTime.now().plus(2, ChronoUnit.MONTHS).toInstant(ZoneOffset.UTC),
+                ZoneId.systemDefault());
+
+        // July
+        dailyScheduledService.setClock(clock);
+
+        paymentsManagementService.processPayment(
+                testClient.getId(),
+                testCredit.getId(),
+                new PaymentDetails(
+                        testCredit.getStartDate().plus(2, ChronoUnit.MONTHS).minus(1, ChronoUnit.DAYS),
+                        PaymentType.REFUND,
+                        PaymentChannel.BANK_ACCOUNT,
+                        10300.0)
+        );
+
+        dailyScheduledService.manageDailyPayments();
+
+        var updatedCredit = creditsRepo.findById(testCredit.getId()).get();
+        assertEquals(0, (int) updatedCredit.getBalance());
+        assertEquals(CreditStatus.CLOSED, updatedCredit.getStatus());
     }
 }
