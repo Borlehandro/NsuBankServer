@@ -119,9 +119,9 @@ public class CreditManagementTests extends ApplicationTests {
         var updatedTable = creditTableService.findByCreditId(testCredit.getId());
         updatedTable.sort(Comparator.comparing(tableRow -> tableRow.getId().getTimestamp()));
 
-        assertEquals(1000.0, updatedTable.get(0).getExpectedPayout());
+        assertEquals(970.0, updatedTable.get(0).getExpectedPayout());
         System.out.println("FEE:" + updatedTable.get(0).getFee());
-        assertTrue(Math.abs(updatedTable.get(0).getFee() - 30) < 1);
+        assertEquals(30.0, updatedTable.get(0).getFee());
         assertTrue(Math.abs(updatedTable.get(0).getBalanceAfterPayment() - 9231.0) < 1);
         System.out.println("LAST: " + updatedTable.get(updatedTable.size() - 1));
         updatedTable.subList(1, updatedTable.size()).forEach(

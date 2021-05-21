@@ -11,19 +11,15 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CreditTableRepo extends CrudRepository<CreditsTable, CreditTableId>,
         JpaSpecificationExecutor<CreditsTable> {
     List<CreditsTable> findAllById_Credit_Id(int id);
 
-    @Query("""
-            select table from CreditsTable table
-                     where table.id.credit.id = :credit_id
-                     and table.id.timestamp >= :after_time
-             """)
-    List<CreditsTable> findAllByCreditIdAndDateAfter(
-            @Param("credit_id") int creditId,
+    List<CreditsTable> findAllById_CreditAndId_TimestampAfterOrderById_Timestamp(
+            @Param("credit_id") Credit credit,
             @Param("after_time") LocalDateTime dateTime
     );
 
@@ -42,9 +38,10 @@ public interface CreditTableRepo extends CrudRepository<CreditsTable, CreditTabl
 
     @Query("""
     select credit_table from CreditsTable credit_table
-        where credit_table.id.timestamp between :start_time and :end_time
+        where ((credit_table.id.timestamp between :start_time and :end_time)
+            and (credit_table.realPayout < credit_table.expectedPayout))
     """)
-    List<CreditsTable> findAllWhereTimestampBetween(
+    List<CreditsTable> findAllWhereTimestampBetweenAndRealPayoutLessThanExpected(
             @Param("start_time") LocalDateTime startTime,
             @Param("end_time") LocalDateTime endTime);
 }

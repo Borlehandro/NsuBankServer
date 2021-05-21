@@ -29,6 +29,22 @@ public class Offer implements Serializable {
         this.maximumSum = maximumSum;
     }
 
+    public Offer(String name,
+                 double percentsPerMonth,
+                 double lateFeePercents,
+                 int minimumMonthPeriod,
+                 int maximumMonthPeriod,
+                 int minimumSum,
+                 int maximumSum) {
+        this.name = name;
+        this.percentsPerMonth = percentsPerMonth;
+        this.lateFeePercents = lateFeePercents;
+        this.minimumMonthPeriod = minimumMonthPeriod;
+        this.maximumMonthPeriod = maximumMonthPeriod;
+        this.minimumSum = minimumSum;
+        this.maximumSum = maximumSum;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
@@ -38,6 +54,10 @@ public class Offer implements Serializable {
     @Column(nullable = false)
     @NonNull
     private Double percentsPerMonth;
+
+    @Column(nullable = false)
+    @NonNull
+    private Double lateFeePercents = 0.0;
 
     private Integer minimumMonthPeriod;
 

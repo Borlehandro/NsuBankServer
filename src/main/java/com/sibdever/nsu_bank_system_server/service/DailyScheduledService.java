@@ -2,6 +2,7 @@ package com.sibdever.nsu_bank_system_server.service;
 
 import com.sibdever.nsu_bank_system_server.data.model.entities.Credit;
 import com.sibdever.nsu_bank_system_server.data.model.entities.Payment;
+import com.sibdever.nsu_bank_system_server.data.repo.CreditTableRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.CreditsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,6 +20,8 @@ public class DailyScheduledService {
     private CreditsManagementService creditsManagementService;
     @Autowired
     private CreditsRepo creditsRepo;
+    @Autowired
+    private CreditTableRepo creditTableRepo;
 
     private LocalDateTime lastLaunch = LocalDateTime.now();
 
@@ -43,6 +47,17 @@ public class DailyScheduledService {
                         lastLaunch.toLocalDate()
                 )
         );
+
+        // Todo use date
+        var creditTableRowsToCheck = creditTableRepo.findAllWhereTimestampBetweenAndRealPayoutLessThanExpected(
+                lastLaunch,
+                lastLaunch.minus(1, ChronoUnit.MONTHS)
+        );
+
+        creditTableRowsToCheck.forEach(row -> {
+
+        });
+
     }
 
 }

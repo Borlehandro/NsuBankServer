@@ -93,37 +93,38 @@ public class CreditsManagementService {
         double sum = calculatePaymentsSum(payments);
         double fee = calculateSummaryFee(payments);
         var timetableRowsToCalculate =
-                creditTableRepo.findAllByCreditIdAndDateAfter(credit.getId(), afterTime);
+                creditTableRepo.findAllById_CreditAndId_TimestampAfterOrderById_Timestamp(credit, afterTime);
 
         var currentMonthRow = timetableRowsToCalculate.get(0);
 
         var previousPayments = currentMonthRow.getPayment();
 
         if (previousPayments != null) {
-            if (!previousPayments.isEmpty())
+            if (!previousPayments.isEmpty()) {
                 sum += currentMonthRow.getRealPayout();
+            }
             previousPayments.addAll(payments);
         } else currentMonthRow.setPayment(payments);
 
         currentMonthRow.setRealPayout(sum - fee);
+        currentMonthRow.setFee(fee + currentMonthRow.getFee());
 
         // Recalculate future table rows
         if (currentMonthRow.getRealPayout() >= currentMonthRow.getExpectedPayout()) {
-            currentMonthRow.setExpectedPayout(sum);
+            currentMonthRow.setExpectedPayout(currentMonthRow.getRealPayout());
 
             double paymentOfPercents =
                     calculatePaymentOfPercents(credit.getOffer().getPercentsPerMonth(), credit.getBalance());
 
-            double paymentOfDebt = calculatePaymentOfDebt(sum, paymentOfPercents);
+            double paymentOfDebt = calculatePaymentOfDebt(currentMonthRow.getExpectedPayout(), paymentOfPercents);
 
             currentMonthRow.setPaymentOfPercents(paymentOfPercents);
             currentMonthRow.setPaymentOfDebt(paymentOfDebt);
-            currentMonthRow.setFee(fee);
-            currentMonthRow.setBalanceAfterPayment(credit.getBalance() - paymentOfDebt + fee);
-            credit.setBalance(credit.getBalance() - paymentOfDebt + fee);
+            credit.setBalance(credit.getBalance() - paymentOfDebt);
+            currentMonthRow.setBalanceAfterPayment(credit.getBalance());
 
             if (credit.getBalance() >= 0) {
-                credit.setCashInflow(credit.getCashInflow() + sum - fee);
+                credit.setCashInflow(credit.getCashInflow() + currentMonthRow.getRealPayout());
             } else {
                 // Pay back if overpay
                 // Todo save payment with service
@@ -139,7 +140,7 @@ public class CreditsManagementService {
                                 )
                         )
                 );
-                credit.setCashInflow(credit.getCashInflow() + sum - fee - Math.abs(credit.getBalance()));
+                credit.setCashInflow(credit.getCashInflow() + currentMonthRow.getRealPayout() - Math.abs(credit.getBalance()));
                 credit.setBalance(0.00d);
             }
             if (Math.abs(credit.getBalance()) < 0.01d) {
@@ -161,12 +162,38 @@ public class CreditsManagementService {
                         credit.getOffer().getPercentsPerMonth());
             }
         } else {
-            credit.setCashInflow(credit.getCashInflow() + sum - fee);
-            currentMonthRow.setFee(fee);
+            credit.setCashInflow(credit.getCashInflow() + currentMonthRow.getRealPayout());
         }
         credit.setProfitMargin(credit.getCashInflow() / credit.getSum());
         dayStatisticRepo.save(new DayStatistic(currentDay, credit.getCashInflow(), credit.getProfitMargin(), credit));
         creditsRepo.saveAndFlush(credit);
+    }
+
+    public void handleExpired(CreditsTable expiredRecord) {
+        var credit = expiredRecord.getId().getCredit();
+        expiredRecord.setBalanceAfterPayment(credit.getBalance() - expiredRecord.getRealPayout());
+        expiredRecord.setBalanceAfterPayment(credit.getBalance() - expiredRecord.getRealPayout());
+        expiredRecord.setCreditStatusAfterPayment(CreditStatus.EXPIRED);
+        credit.setStatus(CreditStatus.EXPIRED);
+        creditHistoryRepo.save(new CreditHistory(credit.getClient(), credit, CreditStatus.EXPIRED, LocalDateTime.now()));
+        var outstandingDebt = expiredRecord.getExpectedPayout() - expiredRecord.getRealPayout();
+        var nextRecordsList =
+                creditTableRepo.findAllById_CreditAndId_TimestampAfterOrderById_Timestamp(
+                        expiredRecord.getId().getCredit(),
+                        expiredRecord.getId().getTimestamp()
+                );
+        // It was not the last payment
+        if(!nextRecordsList.isEmpty()) {
+            var nextRecord = nextRecordsList.get(0);
+            // Todo use big decimal
+            nextRecord.setExpectedPayout(
+                    nextRecord.getExpectedPayout() + outstandingDebt * credit.getOffer().getLateFeePercents()
+            );
+            // Todo realize
+        } else {
+            // It was the last payment
+            // Todo realize
+        }
     }
 
     private double calculatePaymentsSum(Set<Payment> payments) {
