@@ -162,10 +162,28 @@ public class CreditManagementTests extends ApplicationTests {
         assertEquals(1, updatedTable.size());
 
         var history = creditHistoryService.getCreditHistory(testCredit.getId());
+        System.out.println(history);
         history.sort(Comparator.comparing(CreditHistory::getTimestamp));
         assertEquals(2, history.size());
         assertEquals(CreditStatus.ACTIVE, history.get(0).getCreditStatus());
         assertEquals(CreditStatus.CLOSED, history.get(1).getCreditStatus());
         assertNull(testClient.getActiveCredit());
+    }
+
+    // Todo write late pay tests
+
+    @Test
+    public void testLatePayNotLastMonth() {
+        fail();
+    }
+
+    @Test
+    public void testLatePayLastMonth() {
+        fail();
+    }
+
+    @Test
+    public void testClosingAfterLatePay() {
+        fail();
     }
 }

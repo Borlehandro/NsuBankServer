@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
@@ -16,14 +17,21 @@ import java.util.stream.Collectors;
 @Service
 public class DailyScheduledService {
 
-    @Autowired
-    private CreditsManagementService creditsManagementService;
-    @Autowired
-    private CreditsRepo creditsRepo;
-    @Autowired
-    private CreditTableRepo creditTableRepo;
+    private final CreditsManagementService creditsManagementService;
+    private final CreditsRepo creditsRepo;
+    private final CreditTableRepo creditTableRepo;
+    
+    private final Clock clock;
 
-    private LocalDateTime lastLaunch = LocalDateTime.now();
+    private LocalDateTime lastLaunch;
+
+    public DailyScheduledService(CreditsManagementService creditsManagementService, CreditsRepo creditsRepo, CreditTableRepo creditTableRepo, Clock clock) {
+        this.creditsManagementService = creditsManagementService;
+        this.creditsRepo = creditsRepo;
+        this.creditTableRepo = creditTableRepo;
+        this.clock = clock;
+        lastLaunch = LocalDateTime.now(clock);
+    }
 
     // Todo use cron
     @Scheduled(fixedDelay = 1000)
@@ -38,7 +46,7 @@ public class DailyScheduledService {
                         Collectors.mapping((Object[] item) -> (Payment) item[1], Collectors.toSet())
                 ));
 
-        lastLaunch = LocalDateTime.now();
+        lastLaunch = LocalDateTime.now(clock);
 
         creditPayments.keySet().forEach(credit ->
                 creditsManagementService.recalculateCreditTableWithDailyPayments(
@@ -54,9 +62,7 @@ public class DailyScheduledService {
                 lastLaunch.minus(1, ChronoUnit.MONTHS)
         );
 
-        creditTableRowsToCheck.forEach(row -> {
-
-        });
+        creditTableRowsToCheck.forEach(creditsManagementService::handleExpired);
 
     }
 

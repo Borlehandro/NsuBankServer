@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -17,25 +18,31 @@ import java.util.Set;
 @Service
 public class CreditsManagementService {
 
-    @Autowired
-    private CreditsRepo creditsRepo;
-    @Autowired
-    private ClientsRepo clientsRepo;
-    @Autowired
-    private CreditTableRepo creditTableRepo;
-    @Autowired
-    private PaymentsRepo paymentsRepo;
-    @Autowired
-    private CreditHistoryRepo creditHistoryRepo;
-    @Autowired
-    private DayStatisticRepo dayStatisticRepo;
+    private final CreditsRepo creditsRepo;
+    private final ClientsRepo clientsRepo;
+    private final CreditTableRepo creditTableRepo;
+    private final PaymentsRepo paymentsRepo;
+    private final CreditHistoryRepo creditHistoryRepo;
+    private final DayStatisticRepo dayStatisticRepo;
+    
+    private final Clock clock;
+
+    public CreditsManagementService(CreditsRepo creditsRepo, ClientsRepo clientsRepo, CreditTableRepo creditTableRepo, PaymentsRepo paymentsRepo, CreditHistoryRepo creditHistoryRepo, DayStatisticRepo dayStatisticRepo, Clock clock) {
+        this.creditsRepo = creditsRepo;
+        this.clientsRepo = clientsRepo;
+        this.creditTableRepo = creditTableRepo;
+        this.paymentsRepo = paymentsRepo;
+        this.creditHistoryRepo = creditHistoryRepo;
+        this.dayStatisticRepo = dayStatisticRepo;
+        this.clock = clock;
+    }
 
     // Caller method is Transactional
     public Credit giveCredit(Client client, Offer offer, int monthPeriod, double sum, PaymentChannel payTo) {
         // Todo use BigDecimal
         var credit = new Credit(
                 client,
-                LocalDateTime.now(),
+                LocalDateTime.now(clock),
                 monthPeriod,
                 sum,
                 sum + sum * (payTo.getFeePercents() / 100d),
@@ -133,7 +140,7 @@ public class CreditsManagementService {
                                 credit.getClient(),
                                 credit,
                                 new PaymentDetails(
-                                        LocalDateTime.now(),
+                                        LocalDateTime.now(clock),
                                         PaymentType.RELEASE,
                                         PaymentChannel.BANK_ACCOUNT,
                                         Math.abs(credit.getBalance())
@@ -152,7 +159,7 @@ public class CreditsManagementService {
                     else
                         credit.getClient().setClientStatus(ClientStatus.WITHOUT_OFFER);
                 }
-                creditHistoryRepo.save(new CreditHistory(credit.getClient(), credit, CreditStatus.CLOSED, LocalDateTime.now()));
+                creditHistoryRepo.save(new CreditHistory(credit.getClient(), credit, CreditStatus.CLOSED, LocalDateTime.now(clock)));
                 currentMonthRow.setCreditStatusAfterPayment(CreditStatus.CLOSED);
                 creditTableRepo.deleteAll(timetableRowsToCalculate.subList(1, timetableRowsToCalculate.size()));
             } else {
@@ -171,28 +178,47 @@ public class CreditsManagementService {
 
     public void handleExpired(CreditsTable expiredRecord) {
         var credit = expiredRecord.getId().getCredit();
-        expiredRecord.setBalanceAfterPayment(credit.getBalance() - expiredRecord.getRealPayout());
-        expiredRecord.setBalanceAfterPayment(credit.getBalance() - expiredRecord.getRealPayout());
+        var offer = credit.getOffer();
+        var outstandingDebt = expiredRecord.getExpectedPayout() - expiredRecord.getRealPayout();
+
+        expiredRecord.setExpectedPayout(expiredRecord.getRealPayout());
+
+        double paymentOfPercents =
+                calculatePaymentOfPercents(offer.getPercentsPerMonth(), credit.getBalance());
+        double paymentOfDebt = calculatePaymentOfDebt(expiredRecord.getExpectedPayout(), paymentOfPercents);
+        expiredRecord.setPaymentOfPercents(paymentOfPercents);
+        expiredRecord.setPaymentOfDebt(paymentOfDebt);
+
+        // Todo use big decimal
+        credit.setBalance(credit.getBalance() - paymentOfDebt + outstandingDebt * offer.getLateFeePercents());
+        expiredRecord.setBalanceAfterPayment(credit.getBalance());
+
         expiredRecord.setCreditStatusAfterPayment(CreditStatus.EXPIRED);
         credit.setStatus(CreditStatus.EXPIRED);
-        creditHistoryRepo.save(new CreditHistory(credit.getClient(), credit, CreditStatus.EXPIRED, LocalDateTime.now()));
-        var outstandingDebt = expiredRecord.getExpectedPayout() - expiredRecord.getRealPayout();
+        creditHistoryRepo.save(new CreditHistory(credit.getClient(), credit, CreditStatus.EXPIRED, LocalDateTime.now(clock)));
+
         var nextRecordsList =
                 creditTableRepo.findAllById_CreditAndId_TimestampAfterOrderById_Timestamp(
                         expiredRecord.getId().getCredit(),
                         expiredRecord.getId().getTimestamp()
                 );
-        // It was not the last payment
         if(!nextRecordsList.isEmpty()) {
-            var nextRecord = nextRecordsList.get(0);
-            // Todo use big decimal
-            nextRecord.setExpectedPayout(
-                    nextRecord.getExpectedPayout() + outstandingDebt * credit.getOffer().getLateFeePercents()
-            );
-            // Todo realize
+            updateCreditTable(nextRecordsList, credit.getBalance(), offer.getPercentsPerMonth());
         } else {
-            // It was the last payment
-            // Todo realize
+            // Add last month record
+            double newMonthPayout = calculateMonthPayout(credit.getBalance(), offer.getPercentsPerMonth(), 1);
+            double newPaymentOfPercents = calculatePaymentOfPercents(offer.getPercentsPerMonth(), credit.getBalance());
+            double newPaymentOfDebt  = calculatePaymentOfDebt(newMonthPayout, newPaymentOfPercents);
+            creditTableRepo.save(new CreditsTable(
+                    new CreditTableId(
+                            credit, expiredRecord.getId().getTimestamp().plus(1, ChronoUnit.MONTHS)
+                    ),
+                    newMonthPayout,
+                    newPaymentOfPercents,
+                    newPaymentOfDebt,
+                    0.0,
+                    CreditStatus.CLOSED
+            ));
         }
     }
 
