@@ -5,6 +5,7 @@ import com.sibdever.nsu_bank_system_server.data.model.entities.PaymentChannel;
 import com.sibdever.nsu_bank_system_server.data.model.entities.PaymentType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

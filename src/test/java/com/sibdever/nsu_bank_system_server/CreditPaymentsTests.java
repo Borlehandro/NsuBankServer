@@ -45,9 +45,7 @@ class CreditPaymentsTests extends ApplicationTests {
 		assertDoesNotThrow(() -> payments[1] = paymentsManagementService.processPayment(client.getId(), credit[0].getId(), new PaymentDetails(LocalDateTime.now().plus(2, ChronoUnit.DAYS), PaymentType.REFUND, PaymentChannel.BANK_ACCOUNT, 120.0)));
 
 		var creditPayments  = creditsRepo
-				.findAllJoinPaymentsAfterTime(credit[0].getStartDate()
-						.plus(1, ChronoUnit.DAYS)
-						.plus(1, ChronoUnit.HOURS))
+				.findAllWherePaymentsNotHandled()
 				.stream()
 				.collect(Collectors.groupingBy(
 						(Object[] item) -> (Credit)item[0],

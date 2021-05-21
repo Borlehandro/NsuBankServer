@@ -14,8 +14,7 @@ public interface CreditsRepo extends JpaRepository<Credit, Integer> {
     @Query(value = """
             select credit, payment from Payment payment
                 join payment.credit credit
-                where payment.paymentDetails.timestamp > :date_time
-                    and payment.paymentDetails.timestamp > credit.startDate
+                where payment.handled = false and payment.paymentDetails.type = 1
             """)
-    List<Object[]> findAllJoinPaymentsAfterTime(@Param("date_time") LocalDateTime dateTime);
+    List<Object[]> findAllWherePaymentsNotHandled();
 }

@@ -9,6 +9,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -36,12 +37,13 @@ public interface CreditTableRepo extends CrudRepository<CreditsTable, CreditTabl
             """)
     List<CreditsTable> findAllByClientIdIsActive(@Param("client_id") int clientId);
 
-    @Query("""
-    select credit_table from CreditsTable credit_table
-        where ((credit_table.id.timestamp between :start_time and :end_time)
-            and (credit_table.realPayout < credit_table.expectedPayout))
-    """)
-    List<CreditsTable> findAllWhereTimestampBetweenAndRealPayoutLessThanExpected(
-            @Param("start_time") LocalDateTime startTime,
-            @Param("end_time") LocalDateTime endTime);
+    @Query(value = """
+    select * from credits_table
+        where (credits_table.real_payout < credits_table.expected_payout)
+        and (date_trunc('day', credits_table.timestamp) = date_trunc('day', :date_now))
+    """, nativeQuery = true)
+    List<CreditsTable> findAllInThisMonthWhereRealPayoutLessThanExpected(
+            @Param("date_now") LocalDateTime currentDate);
+
+    /**/
 }

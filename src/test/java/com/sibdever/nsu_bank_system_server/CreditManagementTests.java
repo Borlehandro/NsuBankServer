@@ -1,8 +1,10 @@
 package com.sibdever.nsu_bank_system_server;
 
 import com.sibdever.nsu_bank_system_server.data.model.entities.*;
+import com.sibdever.nsu_bank_system_server.data.repo.CreditTableRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.CreditsRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.DayStatisticRepo;
+import com.sibdever.nsu_bank_system_server.data.repo.PaymentsRepo;
 import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import com.sibdever.nsu_bank_system_server.service.*;
 import org.junit.jupiter.api.Assertions;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 
 import javax.transaction.Transactional;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
@@ -37,6 +40,10 @@ public class CreditManagementTests extends ApplicationTests {
     private DayStatisticRepo dayStatisticRepo;
     @Autowired
     private CreditHistoryService creditHistoryService;
+    @Autowired
+    private CreditTableRepo creditTableRepo;
+    @Autowired
+    private PaymentsRepo paymentsRepo;
 
     @BeforeAll
     @Rollback(false)
@@ -173,16 +180,61 @@ public class CreditManagementTests extends ApplicationTests {
     // Todo write late pay tests
 
     @Test
-    public void testLatePayNotLastMonth() {
-        fail();
+    @Transactional
+    public void testLatePayNotLastMonth() throws WrongCredentialsException, InterruptedException {
+
+        paymentsManagementService.processPayment(
+                testClient.getId(),
+                testCredit.getId(),
+                new PaymentDetails(
+                        testCredit.getStartDate(),
+                        PaymentType.REFUND,
+                        PaymentChannel.YOO_MONEY,
+                        100.0)
+        );
+
+        System.out.println("Payment time:" + paymentsRepo.findAll().get(0).getPaymentDetails().getTimestamp());
+
+        dailyScheduledService.manageDailyPayments();
+
+        var oldTable = creditTableService.findByCreditId(testCredit.getId());
+        oldTable.sort(Comparator.comparing(tableRow -> tableRow.getId().getTimestamp()));
+
+        Clock clock = Clock.fixed(
+                LocalDateTime.now().plus(1, ChronoUnit.MONTHS).toInstant(ZoneOffset.UTC),
+                ZoneId.systemDefault());
+
+        oldTable.forEach(item -> System.out.println(item.getExpectedPayout() + "  " + item.getRealPayout()));
+        System.out.println();
+
+        // Move time
+        dailyScheduledService.setClock(clock);
+
+        oldTable.forEach(item -> System.out.println(item.getExpectedPayout() + "  " + item.getRealPayout()));
+
+        dailyScheduledService.manageDailyPayments();
+
+        var updatedTable = creditTableService.findByCreditId(testCredit.getId());
+        System.out.println("Up:");
+        updatedTable.forEach(item -> System.out.println(item.getId().getTimestamp() + " " + item.getExpectedPayout() + "  " + item.getRealPayout()));
+
+        var updatedCredit = creditsRepo.findById(testCredit.getId()).get();
+        assertEquals(10104, (int) updatedCredit.getBalance());
+        assertEquals(CreditStatus.EXPIRED, updatedCredit.getStatus());
+        assertEquals(12, updatedTable.size());
+        assertEquals(101.04, updatedTable.get(1).getPaymentOfPercents());
+        assertEquals(873, (int) updatedTable.get(1).getPaymentOfDebt());
+        assertEquals(9230, (int) updatedTable.get(1).getBalanceAfterPayment());
     }
 
     @Test
+    @Transactional
     public void testLatePayLastMonth() {
         fail();
     }
 
     @Test
+    @Transactional
     public void testClosingAfterLatePay() {
         fail();
     }

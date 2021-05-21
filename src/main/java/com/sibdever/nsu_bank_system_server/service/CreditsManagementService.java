@@ -3,7 +3,6 @@ package com.sibdever.nsu_bank_system_server.service;
 import com.sibdever.nsu_bank_system_server.data.ClientStatus;
 import com.sibdever.nsu_bank_system_server.data.model.entities.*;
 import com.sibdever.nsu_bank_system_server.data.repo.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,7 +24,7 @@ public class CreditsManagementService {
     private final CreditHistoryRepo creditHistoryRepo;
     private final DayStatisticRepo dayStatisticRepo;
     
-    private final Clock clock;
+    private Clock clock;
 
     public CreditsManagementService(CreditsRepo creditsRepo, ClientsRepo clientsRepo, CreditTableRepo creditTableRepo, PaymentsRepo paymentsRepo, CreditHistoryRepo creditHistoryRepo, DayStatisticRepo dayStatisticRepo, Clock clock) {
         this.creditsRepo = creditsRepo;
@@ -98,6 +97,7 @@ public class CreditsManagementService {
     public void recalculateCreditTableWithDailyPayments(Credit credit, Set<Payment> payments, LocalDate currentDay) {
         var afterTime = payments.stream().findFirst().get().getPaymentDetails().getTimestamp();
         double sum = calculatePaymentsSum(payments);
+        System.out.println("Wanna pay: " + sum);
         double fee = calculateSummaryFee(payments);
         var timetableRowsToCalculate =
                 creditTableRepo.findAllById_CreditAndId_TimestampAfterOrderById_Timestamp(credit, afterTime);
@@ -113,6 +113,7 @@ public class CreditsManagementService {
             previousPayments.addAll(payments);
         } else currentMonthRow.setPayment(payments);
 
+        currentMonthRow.setPayment(previousPayments);
         currentMonthRow.setRealPayout(sum - fee);
         currentMonthRow.setFee(fee + currentMonthRow.getFee());
 
@@ -268,5 +269,9 @@ public class CreditsManagementService {
 
     private double calculateBalanceAfterPayment(double currentBalance, double paymentOfDebt) {
         return BigDecimal.valueOf(currentBalance).subtract(BigDecimal.valueOf(paymentOfDebt)).doubleValue();
+    }
+
+    public void setClock(Clock clock) {
+        this.clock = clock;
     }
 }

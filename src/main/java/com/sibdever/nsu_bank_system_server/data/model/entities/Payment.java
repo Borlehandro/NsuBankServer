@@ -30,4 +30,7 @@ public class Payment {
     @Embedded
     private PaymentDetails paymentDetails;
 
+    @Column(nullable = false)
+    private boolean handled = false;
+
 }
