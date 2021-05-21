@@ -78,6 +78,8 @@ public class CreditsTable {
 
     private double fee;
 
+    private double forfeit;
+
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
     @NonNull

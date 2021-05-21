@@ -189,7 +189,8 @@ public class CreditsManagementService {
     public void handleExpired(CreditsTable expiredRecord) {
         var credit = expiredRecord.getId().getCredit();
         var offer = credit.getOffer();
-        var outstandingDebt = expiredRecord.getExpectedPayout() - expiredRecord.getRealPayout();
+        double outstandingDebt = expiredRecord.getExpectedPayout() - expiredRecord.getRealPayout();
+        double forfeit = outstandingDebt * offer.getLateFeePercents();
 
         expiredRecord.setExpectedPayout(expiredRecord.getRealPayout());
 
@@ -200,8 +201,9 @@ public class CreditsManagementService {
         expiredRecord.setPaymentOfDebt(paymentOfDebt);
 
         // Todo use big decimal
-        credit.setBalance(credit.getBalance() - paymentOfDebt + outstandingDebt * offer.getLateFeePercents());
+        credit.setBalance(credit.getBalance() - paymentOfDebt + forfeit);
         expiredRecord.setBalanceAfterPayment(credit.getBalance());
+        expiredRecord.setForfeit(forfeit);
 
         expiredRecord.setCreditStatusAfterPayment(CreditStatus.EXPIRED);
         credit.setStatus(CreditStatus.EXPIRED);
