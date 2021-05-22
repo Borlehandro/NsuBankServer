@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 public interface CreditTableRepo extends CrudRepository<CreditsTable, CreditTableId>,
         JpaSpecificationExecutor<CreditsTable> {
-    List<CreditsTable> findAllById_Credit_Id(int id);
+    List<CreditsTable> findAllById_Credit_IdOrderById_Timestamp(int id);
 
     List<CreditsTable> findAllById_CreditAndId_TimestampAfterOrderById_Timestamp(
             @Param("credit_id") Credit credit,
@@ -28,7 +28,7 @@ public interface CreditTableRepo extends CrudRepository<CreditsTable, CreditTabl
             select credit_table.id.credit, credit_table from CreditsTable credit_table
                 where credit_table.id.credit.client.id = :client_id
             """)
-    List<Object[]> findAllByClientId(@Param("client_id") int clientId);
+    List<Object[]> findAllGroupingByClientId(@Param("client_id") int clientId);
 
     @Query("""
             select credit_table from CreditsTable credit_table
@@ -40,10 +40,8 @@ public interface CreditTableRepo extends CrudRepository<CreditsTable, CreditTabl
     @Query(value = """
     select * from credits_table
         where (credits_table.real_payout < credits_table.expected_payout)
-        and (date_trunc('day', credits_table.timestamp) = date_trunc('day', :date_now))
+        and ((credits_table.timestamp)::::date = (:date_now)::::date)
     """, nativeQuery = true)
     List<CreditsTable> findAllInThisMonthWhereRealPayoutLessThanExpected(
             @Param("date_now") LocalDateTime currentDate);
-
-    /**/
 }

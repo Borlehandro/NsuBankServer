@@ -33,11 +33,11 @@ public class CreditHistoryService {
 
     // Credit table
     public List<CreditsTable> getCreditTableForCredit(int creditId) {
-        return creditTableRepo.findAllById_Credit_Id(creditId);
+        return creditTableRepo.findAllById_Credit_IdOrderById_Timestamp(creditId);
     }
 
     public Map<Credit, List<CreditsTable>> getAllCreditTablesForClient(int clientId) {
-        return creditTableRepo.findAllByClientId(clientId)
+        return creditTableRepo.findAllGroupingByClientId(clientId)
                 .stream()
                 .collect(Collectors.groupingBy(
                         (Object[] item) -> (Credit) item[0],

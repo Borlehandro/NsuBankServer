@@ -78,6 +78,9 @@ public class DailyScheduledService {
         var creditTableRowsToCheck = creditTableRepo
                 .findAllInThisMonthWhereRealPayoutLessThanExpected(lastLaunch);
 
+        System.out.println("\nTO CHECK");
+        creditTableRowsToCheck.forEach(System.out::println);
+        System.out.println("END TO CHECK\n");
         creditTableRowsToCheck.forEach(creditsManagementService::handleExpired);
     }
 
