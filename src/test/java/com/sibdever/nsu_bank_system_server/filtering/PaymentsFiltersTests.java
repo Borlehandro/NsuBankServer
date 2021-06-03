@@ -14,16 +14,21 @@ import com.sibdever.nsu_bank_system_server.data.repo.CreditTableRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.PaymentsRepo;
 import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import com.sibdever.nsu_bank_system_server.service.*;
+import com.sibdever.nsu_bank_system_server.service.filtering.PaymentsFilteringService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.annotation.Rollback;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PaymentsFiltersTests extends ApplicationTests {
     static Client testClient1;
@@ -39,6 +44,8 @@ public class PaymentsFiltersTests extends ApplicationTests {
     private PaymentsManagementService paymentsManagementService;
     @Autowired
     private DailyScheduledService dailyScheduledService;
+    @Autowired
+    private PaymentsFilteringService paymentsFilteringService;
 
     @BeforeAll
     @Rollback(value = false)
@@ -125,6 +132,7 @@ public class PaymentsFiltersTests extends ApplicationTests {
                         CriteriaOperator.GREATER_OR_EQUALS,
                         0.5)
         );
+
         var spec2 = new PaymentsSpecification(
                 new PaymentSearchCriteria(
                         PaymentCriteriaKey.PAYMENT_TYPE,
@@ -132,10 +140,24 @@ public class PaymentsFiltersTests extends ApplicationTests {
                         PaymentType.REFUND)
         );
 
+        var spec3 = new PaymentsSpecification(
+                new PaymentSearchCriteria(
+                        PaymentCriteriaKey.PAYMENT_SUM,
+                        CriteriaOperator.GREATER_OR_EQUALS,
+                        "60000"
+                )
+        );
+
         var res = paymentsRepo.findAll(spec1);
         assertEquals(6, res.size());
         res = paymentsRepo.findAll(Specification.where(spec1).and(spec2));
         assertEquals(4, res.size());
+        Pageable pageable = PageRequest.of(0, 5);
+        var resPage = paymentsRepo.findAll(spec3, pageable);
+        var resList = resPage.get().collect(Collectors.toList());
+        assertEquals(4, resPage.get().count());
+        var pageFromService = paymentsFilteringService.getPaymentsListBySpecification(spec3, pageable);
+        assertEquals(4, pageFromService.get().count());
     }
 
 }

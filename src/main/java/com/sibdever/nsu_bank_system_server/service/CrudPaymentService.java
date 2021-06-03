@@ -21,21 +21,5 @@ public class CrudPaymentService {
         return repo.findAll();
     }
 
-    public List<Payment> findAllByChannel(PaymentChannel channel) {
-        return repo.findAllByPaymentDetails_ChannelOrderByPaymentDetails_Timestamp(channel);
-    }
-
-    public List<Payment> findAllByType(PaymentType type) {
-        return repo.findAllByPaymentDetails_TypeOrderByPaymentDetails_Timestamp(type);
-    }
-
-    public List<Payment> findAllByCreditId(int creditId) {
-        return repo.findAllByCredit_IdOrderByPaymentDetails_Timestamp(creditId);
-    }
-
-    public List<Payment> findAllByClientId(int clientId) {
-        return repo.findAllByClient_IdOrderByPaymentDetails_Timestamp(clientId);
-    }
-
 
 }

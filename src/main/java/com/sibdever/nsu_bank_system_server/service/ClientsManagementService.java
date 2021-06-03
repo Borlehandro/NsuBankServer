@@ -43,6 +43,11 @@ public class ClientsManagementService {
     }
 
     @Transactional
+    public Client addClient(Client client) {
+        return clientsRepo.save(client);
+    }
+
+    @Transactional
     public void setClientOffer(int clientId, int offerId) throws WrongCredentialsException {
         var optClient = clientsRepo.findById(clientId);
         var optOffer = offersRepo.findById(offerId);

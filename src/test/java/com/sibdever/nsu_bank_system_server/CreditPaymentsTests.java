@@ -53,9 +53,9 @@ class CreditPaymentsTests extends ApplicationTests {
 				));
 
 		assertTrue(creditPayments.containsKey(credit[0]));
-		assertFalse(creditPayments.get(credit[0]).contains(payments[0]));
+		assertTrue(creditPayments.get(credit[0]).contains(payments[0]));
 		assertTrue(creditPayments.get(credit[0]).contains(payments[1]));
-		assertEquals(1, creditPayments.get(credit[0]).size());
+		assertEquals(2, creditPayments.get(credit[0]).size());
 	}
 
 }

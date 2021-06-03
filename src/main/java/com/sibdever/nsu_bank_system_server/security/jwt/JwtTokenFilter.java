@@ -39,6 +39,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         try {
             String token = authorizationHeader.replace( "Bearer ", "");
+            // Todo remove this logging
+            System.out.println("Try to auth with token:" + token);
             Jws<Claims> claims = Jwts.parserBuilder()
                     .setSigningKey(config.getSecretKey())
                     .build()

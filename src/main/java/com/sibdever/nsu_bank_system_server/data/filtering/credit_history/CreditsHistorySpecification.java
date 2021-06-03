@@ -1,5 +1,9 @@
 package com.sibdever.nsu_bank_system_server.data.filtering.credit_history;
 
+import com.sibdever.nsu_bank_system_server.data.filtering.CriteriaOperator;
+import com.sibdever.nsu_bank_system_server.data.filtering.credit_table.CreditTableCriteriaKey;
+import com.sibdever.nsu_bank_system_server.data.filtering.credit_table.CreditTableSearchCriteria;
+import com.sibdever.nsu_bank_system_server.data.filtering.credit_table.CreditsTableSpecification;
 import com.sibdever.nsu_bank_system_server.data.model.entities.CreditHistory;
 import com.sibdever.nsu_bank_system_server.data.model.entities.CreditsTable;
 import lombok.NonNull;
@@ -7,6 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static com.sibdever.nsu_bank_system_server.data.filtering.CriteriaOperator.*;
 
@@ -47,6 +55,38 @@ public class CreditsHistorySpecification implements Specification<CreditHistory>
             expr = expr.get(fieldName);
         }
         return (Path<? extends Comparable>) expr;
+    }
+
+    public static CreditHistorySpecificationBuilder builder() {
+        return new CreditHistorySpecificationBuilder();
+    }
+
+    public static class CreditHistorySpecificationBuilder {
+
+        private final List<CreditHistorySearchCriteria> criteriaList;
+
+        private CreditHistorySpecificationBuilder() {
+            criteriaList = new ArrayList<>();
+        }
+
+        public CreditHistorySpecificationBuilder with(String key, String operator, String value) {
+            criteriaList.add(new CreditHistorySearchCriteria(
+                    CreditHistoryCriteriaKey.valueOf(key.toUpperCase()),
+                    CriteriaOperator.ofSymbol(operator),
+                    value)
+            );
+            return this;
+        }
+
+        public Optional<CreditsHistorySpecification> build() {
+            return this.criteriaList
+                    .stream()
+                    .map(CreditsHistorySpecification::new)
+                    .reduce(
+                            (specification, specification2)
+                                    -> (CreditsHistorySpecification) specification.and(specification2)
+                    );
+        }
     }
 
 }

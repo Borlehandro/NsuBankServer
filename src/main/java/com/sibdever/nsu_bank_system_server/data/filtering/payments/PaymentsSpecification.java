@@ -1,12 +1,18 @@
 package com.sibdever.nsu_bank_system_server.data.filtering.payments;
 
+import com.sibdever.nsu_bank_system_server.data.filtering.CriteriaOperator;
 import com.sibdever.nsu_bank_system_server.data.model.entities.CreditsTable;
 import com.sibdever.nsu_bank_system_server.data.model.entities.Payment;
+import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static com.sibdever.nsu_bank_system_server.data.filtering.CriteriaOperator.*;
 
@@ -47,6 +53,38 @@ public class PaymentsSpecification implements Specification<Payment> {
             expr = expr.get(fieldName);
         }
         return (Path<? extends Comparable>) expr;
+    }
+
+    public static PaymentsSpecificationBuilder builder() {
+        return new PaymentsSpecificationBuilder();
+    }
+
+    public static class PaymentsSpecificationBuilder {
+
+        private final List<PaymentSearchCriteria> criteriaList;
+
+        private PaymentsSpecificationBuilder() {
+            criteriaList = new ArrayList<>();
+        }
+
+        public PaymentsSpecificationBuilder with(String key, String operator, String value) {
+            criteriaList.add(new PaymentSearchCriteria(
+                    PaymentCriteriaKey.valueOf(key.toUpperCase()),
+                    CriteriaOperator.ofSymbol(operator),
+                    value)
+            );
+            return this;
+        }
+
+        public Optional<PaymentsSpecification> build() {
+            return this.criteriaList
+                    .stream()
+                    .map(PaymentsSpecification::new)
+                    .reduce(
+                            (specification, specification2)
+                                    -> (PaymentsSpecification) specification.and(specification2)
+                    );
+        }
     }
 
 }

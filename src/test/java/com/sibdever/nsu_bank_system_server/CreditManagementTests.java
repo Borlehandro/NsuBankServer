@@ -203,10 +203,11 @@ public class CreditManagementTests extends ApplicationTests {
         oldTable.sort(Comparator.comparing(tableRow -> tableRow.getId().getTimestamp()));
 
         Clock clock = Clock.fixed(
-                LocalDateTime.now().plus(1, ChronoUnit.MONTHS).toInstant(ZoneOffset.UTC),
+                LocalDateTime.now().plus(1, ChronoUnit.MONTHS).minus(1, ChronoUnit.DAYS).toInstant(ZoneOffset.UTC),
                 ZoneId.systemDefault());
 
-        oldTable.forEach(item -> System.out.println(item.getExpectedPayout() + "  " + item.getRealPayout()));
+        System.out.println("OLD");
+        oldTable.forEach(item -> System.out.println(item.getId().getTimestamp() + " " + item.getExpectedPayout() + "  " + item.getRealPayout()));
         System.out.println();
 
         // Move time
@@ -221,8 +222,8 @@ public class CreditManagementTests extends ApplicationTests {
         updatedTable.forEach(item -> System.out.println(item.getId().getTimestamp() + " " + item.getExpectedPayout() + "  " + item.getRealPayout()));
 
         var updatedCredit = creditsRepo.findById(testCredit.getId()).get();
-        assertEquals(10104, (int) updatedCredit.getBalance());
         assertEquals(CreditStatus.EXPIRED, updatedCredit.getStatus());
+        assertEquals(10104, (int) updatedCredit.getBalance());
         assertEquals(12, updatedTable.size());
         assertEquals(101.04, updatedTable.get(1).getPaymentOfPercents());
         assertEquals(873, (int) updatedTable.get(1).getPaymentOfDebt());
