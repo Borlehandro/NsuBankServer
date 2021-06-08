@@ -33,9 +33,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .cors().and()
                 .csrf().disable()
                 .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilter(new JwtCredentialsFilter(authenticationManager(), jwtConfig))
                 .addFilterAfter(new JwtTokenFilter(jwtConfig), JwtCredentialsFilter.class)
