@@ -52,7 +52,7 @@ public class CreditManagementTests extends ApplicationTests {
     public static void createClientAndCredit(@Autowired CrudClientService crudClientService,
                                              @Autowired CrudOfferService crudOfferService,
                                              @Autowired ClientsManagementService clientsManagementService) throws WrongCredentialsException {
-        testClient = crudClientService.createClient(new Client("TestClient"));
+        testClient = crudClientService.saveClient(new Client("TestClient"));
         assertEquals(1, List.of(crudClientService.findAll()).size());
         var offer = crudOfferService.createOffer(new Offer("test", 1, 1, 100, 0, 1000000));
         clientsManagementService.setClientOffer(testClient.getId(), offer.getId());

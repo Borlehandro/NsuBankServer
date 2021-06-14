@@ -22,19 +22,23 @@ public class PaymentsListController {
     private PaymentsFilteringService filteringService;
 
     @GetMapping
-    public Page<Payment> getPaymentsListByFiltering(Pageable pageable, @RequestParam String filter) {
+    public Page<Payment> getPaymentsListByFiltering(Pageable pageable, @RequestParam(required = false) String filter) {
 
         var builder = PaymentsSpecification.builder();
 
         Pattern pattern = Pattern.compile("(\\w+?)(:|<|>|!:|<:|>:)(\\w+?),");
 
-        Matcher matcher = pattern.matcher(filter + ",");
-        while (matcher.find()) {
-            builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
+        if(filter != null) {
+            Matcher matcher = pattern.matcher(filter + ",");
+            while (matcher.find()) {
+                builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
+            }
+
+            PaymentsSpecification spec = builder.build().get();
+
+            return filteringService.getPaymentsPageBySpecification(spec, pageable);
+        } else {
+            return filteringService.getPaymentsPage(pageable);
         }
-
-        PaymentsSpecification spec = builder.build().get();
-
-        return filteringService.getPaymentsListBySpecification(spec, pageable);
     }
 }

@@ -3,9 +3,9 @@ package com.sibdever.nsu_bank_system_server.controller.crud;
 import com.sibdever.nsu_bank_system_server.data.model.entities.Client;
 import com.sibdever.nsu_bank_system_server.service.CrudClientService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/crud/client")
@@ -17,7 +17,7 @@ public class CrudClientsController {
     @PostMapping("/create")
     public @ResponseBody
     Client createClient(@RequestBody Client client) {
-        return service.createClient(client);
+        return service.saveClient(client);
     }
 
     @PostMapping("/delete")
@@ -28,14 +28,21 @@ public class CrudClientsController {
 
     @GetMapping("/find")
     public @ResponseBody
-    List<Client> findAllByFullName(@RequestParam String fullName) {
-        return service.findAllByFullName(fullName);
+    Client findById(@RequestParam int id) {
+        return service.findById(id);
     }
 
+    // Todo Pageable!
     @GetMapping("/find-all")
     public @ResponseBody
-    Iterable<Client> findAll() {
-        return service.findAll();
+    Page<Client> findAll(Pageable pageable) {
+        return service.findAll(pageable);
+    }
+
+    @PostMapping("/edit")
+    public
+    void editUser(@RequestBody Client client) {
+        service.saveClient(client);
     }
 
 }

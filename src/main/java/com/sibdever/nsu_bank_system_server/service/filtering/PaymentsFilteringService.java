@@ -14,8 +14,13 @@ public class PaymentsFilteringService {
     @Autowired
     private PaymentsRepo paymentsRepo;
 
-    public Page<Payment> getPaymentsListBySpecification(PaymentsSpecification specification, Pageable pageable) {
+    public Page<Payment> getPaymentsPageBySpecification(PaymentsSpecification specification, Pageable pageable) {
         return paymentsRepo.findAll(specification, pageable);
+    }
+
+    public Page<Payment> getPaymentsPage(Pageable pageable) {
+        return paymentsRepo.findAll(pageable);
+
     }
 
 }

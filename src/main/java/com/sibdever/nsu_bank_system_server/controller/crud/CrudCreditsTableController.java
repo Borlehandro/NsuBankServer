@@ -22,6 +22,7 @@ public class CrudCreditsTableController {
         return service.findByCreditId(creditId);
     }
 
+    @Deprecated
     @GetMapping("/find-all")
     public Iterable<CreditsTable> find() {
         return service.findAll();

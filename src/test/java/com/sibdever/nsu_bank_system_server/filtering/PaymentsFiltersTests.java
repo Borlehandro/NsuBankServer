@@ -2,15 +2,11 @@ package com.sibdever.nsu_bank_system_server.filtering;
 
 import com.sibdever.nsu_bank_system_server.ApplicationTests;
 import com.sibdever.nsu_bank_system_server.data.filtering.CriteriaOperator;
-import com.sibdever.nsu_bank_system_server.data.filtering.credit_history.CreditHistoryCriteriaKey;
-import com.sibdever.nsu_bank_system_server.data.filtering.credit_history.CreditHistorySearchCriteria;
-import com.sibdever.nsu_bank_system_server.data.filtering.credit_history.CreditsHistorySpecification;
 import com.sibdever.nsu_bank_system_server.data.filtering.payments.PaymentCriteriaKey;
 import com.sibdever.nsu_bank_system_server.data.filtering.payments.PaymentSearchCriteria;
 import com.sibdever.nsu_bank_system_server.data.filtering.payments.PaymentsSpecification;
 import com.sibdever.nsu_bank_system_server.data.model.entities.*;
 import com.sibdever.nsu_bank_system_server.data.repo.ClientsRepo;
-import com.sibdever.nsu_bank_system_server.data.repo.CreditTableRepo;
 import com.sibdever.nsu_bank_system_server.data.repo.PaymentsRepo;
 import com.sibdever.nsu_bank_system_server.exception.WrongCredentialsException;
 import com.sibdever.nsu_bank_system_server.service.*;
@@ -53,8 +49,8 @@ public class PaymentsFiltersTests extends ApplicationTests {
                                      @Autowired CrudOfferService crudOfferService,
                                      @Autowired ClientsManagementService clientsManagementService,
                                      @Autowired ClientsRepo clientsRepo) throws WrongCredentialsException {
-        testClient1 = crudClientService.createClient(new Client("TestClient1"));
-        testClient2 = crudClientService.createClient(new Client("TestClient2"));
+        testClient1 = crudClientService.saveClient(new Client("TestClient1"));
+        testClient2 = crudClientService.saveClient(new Client("TestClient2"));
         clientsRepo.flush();
         var testList = crudClientService.findAll();
         assertEquals(2, testList.size());
@@ -156,7 +152,7 @@ public class PaymentsFiltersTests extends ApplicationTests {
         var resPage = paymentsRepo.findAll(spec3, pageable);
         var resList = resPage.get().collect(Collectors.toList());
         assertEquals(4, resPage.get().count());
-        var pageFromService = paymentsFilteringService.getPaymentsListBySpecification(spec3, pageable);
+        var pageFromService = paymentsFilteringService.getPaymentsPageBySpecification(spec3, pageable);
         assertEquals(4, pageFromService.get().count());
     }
 

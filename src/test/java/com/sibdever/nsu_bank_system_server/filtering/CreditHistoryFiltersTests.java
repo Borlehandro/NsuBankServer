@@ -42,8 +42,8 @@ public class CreditHistoryFiltersTests extends ApplicationTests {
                                      @Autowired CrudOfferService crudOfferService,
                                      @Autowired ClientsManagementService clientsManagementService,
                                      @Autowired ClientsRepo clientsRepo) throws WrongCredentialsException {
-        testClient1 = crudClientService.createClient(new Client("TestClient1"));
-        testClient2 = crudClientService.createClient(new Client("TestClient2"));
+        testClient1 = crudClientService.saveClient(new Client("TestClient1"));
+        testClient2 = crudClientService.saveClient(new Client("TestClient2"));
         clientsRepo.flush();
         var testList = crudClientService.findAll();
         assertEquals(2, testList.size());

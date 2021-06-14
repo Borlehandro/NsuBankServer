@@ -3,6 +3,8 @@ package com.sibdever.nsu_bank_system_server.controller.crud;
 import com.sibdever.nsu_bank_system_server.data.model.entities.Operator;
 import com.sibdever.nsu_bank_system_server.service.CrudOperatorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,8 +16,8 @@ public class CrudOperatorsController {
     private CrudOperatorService crudOperatorService;
 
     @GetMapping("/find-all")
-    public List<Operator> findAll() {
-        return crudOperatorService.findAll();
+    public Page<Operator> findAll(Pageable pageable) {
+        return crudOperatorService.findAll(pageable);
     }
 
     @GetMapping("/find")
