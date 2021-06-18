@@ -87,18 +87,7 @@ public class FullReportTests {
         logStatistic();
 
         System.out.println("RESULT: ");
-        fullReportRepo.getFullReportTest().forEach(record -> {
-            System.out.println(
-                    record.getDay() + " "
-                            + record.getMonth() + " "
-                            + record.getYear() + " "
-                            + record.getTotalRelease() + " "
-                            + record.getTotalRefund() + " "
-                            + record.getExpiredCreditsPercent() + " "
-                            + record.getTotalProfit() + " "
-                            + record.getProfitPlus() + " "
-            );
-        });
+        fullReportRepo.getFullReportTest().forEach(System.out::println);
     }
 
     // This tables are really correct!

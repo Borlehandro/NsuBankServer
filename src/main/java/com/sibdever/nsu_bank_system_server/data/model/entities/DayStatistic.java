@@ -18,27 +18,108 @@ import java.time.LocalDateTime;
 @org.hibernate.annotations.NamedNativeQuery(
         name = "FullStatisticReportQuery",
         query = """
-                SELECT date_part('day', day_statistic.date)   as day,
-                             date_part('month', day_statistic.date) as month,
-                             date_part('year', day_statistic.date)  as year,
-                             sum(release_payments.payment_sum)         totalRelease,
-                             sum(refund_payments.payment_sum)          totalRefund,
-                             count(expired_credits)                    expiredCreditsPercent,
-                             avg(day_statistic.profit_margin)          totalProfit,
-                             0                                         profitPlus
-                      from day_statistic
-                               join payments release_payments
-                                    on day_statistic.date = (release_payments.timestamp)::::date and release_payments.type = 0
-                               join payments refund_payments
-                                    on day_statistic.date = (release_payments.timestamp)::::date and refund_payments.type = 1
-                               right outer join credits_history expired_credits
-                                                on day_statistic.date = (expired_credits.timestamp)::::date and
-                                                   expired_credits.credit_status = 2
-                      group by grouping sets (date_part('day', day_statistic.date),
-                                              date_part('month', day_statistic.date),
-                                              date_part('year', day_statistic.date)
-                          );
-                """, resultSetMapping = "ReportRecord")
+                   select (case
+                               when (day is not null) then day::::text
+                               when (month is not null) then date_part('year', month) || '-' || date_part('month', month)
+                               when (year is not null) then date_part('year', year)::::text
+                       end) as period,
+                          release,
+                          refund,
+                          expired_percent,
+                          margin
+                   from (
+                            select coalesce(release.sum, 0)                                           as release,
+                                   coalesce(refund.sum, 0)                                            as refund,
+                                   coalesce(expired.expired_percent, 0)                               as expired_percent,
+                                   coalesce(profit.margin, 0)                                         as margin,
+                                   coalesce(release.day, refund.day, expired.day, profit.day)         as day,
+                                   coalesce(release.month, refund.month, expired.month, profit.month) as month,
+                                   coalesce(release.year, refund.year, expired.year, profit.year)     as year
+                            from aggregated_release release
+                                     left join aggregated_refund refund
+                                               on release.day is not distinct from refund.day and
+                                                  release.month is not distinct from refund.month and
+                                                  release.year is not distinct from refund.year
+                                     left join expired_percent_view expired
+                                               on release.day is not distinct from expired.day and
+                                                  release.month is not distinct from expired.month and
+                                                  release.year is not distinct from expired.year
+                                     left join profit_view profit
+                                               on release.day is not distinct from profit.day and
+                                                  release.month is not distinct from profit.month and
+                                                  release.year is not distinct from profit.year
+                            union all
+                            select coalesce(release.sum, 0)                                           as release,
+                                   coalesce(refund.sum, 0)                                            as refund,
+                                   coalesce(expired.expired_percent, 0)                               as expired_percent,
+                                   coalesce(profit.margin, 0)                                         as margin,
+                                   coalesce(release.day, refund.day, expired.day, profit.day)         as day,
+                                   coalesce(release.month, refund.month, expired.month, profit.month) as month,
+                                   coalesce(release.year, refund.year, expired.year, profit.year)     as year
+                            from aggregated_refund refund
+                                     left join aggregated_release release
+                                               on release.day is not distinct from refund.day and
+                                                  release.month is not distinct from refund.month and
+                                                  release.year is not distinct from refund.year
+                                     left join expired_percent_view expired
+                                               on refund.day is not distinct from expired.day and
+                                                  refund.month is not distinct from expired.month and
+                                                  refund.year is not distinct from expired.year
+                                     left join profit_view profit
+                                               on refund.day is not distinct from profit.day and
+                                                  refund.month is not distinct from profit.month and
+                                                  refund.year is not distinct from profit.year
+                            where release.sum is null
+                            union all
+                            select coalesce(release.sum, 0)                                           as release,
+                                   coalesce(refund.sum, 0)                                            as refund,
+                                   coalesce(expired.expired_percent, 0)                               as expired_percent,
+                                   coalesce(profit.margin, 0)                                         as margin,
+                                   coalesce(release.day, refund.day, expired.day, profit.day)         as day,
+                                   coalesce(release.month, refund.month, expired.month, profit.month) as month,
+                                   coalesce(release.year, refund.year, expired.year, profit.year)     as year
+                            from expired_percent_view expired
+                                     left join aggregated_release release
+                                               on release.day is not distinct from expired.day and
+                                                  release.month is not distinct from expired.month and
+                                                  release.year is not distinct from expired.year
+                                     left join aggregated_refund refund
+                                               on refund.day is not distinct from expired.day and
+                                                  refund.month is not distinct from expired.month and
+                                                  refund.year is not distinct from expired.year
+                                     left join profit_view profit
+                                               on expired.day is not distinct from profit.day and
+                                                  expired.month is not distinct from profit.month and
+                                                  expired.year is not distinct from profit.year
+                            where release.sum is null
+                              and refund.sum is null
+                            union all
+                            select coalesce(release.sum, 0)                                           as release,
+                                   coalesce(refund.sum, 0)                                            as refund,
+                                   coalesce(expired.expired_percent, 0)                               as expired_percent,
+                                   coalesce(profit.margin, 0)                                         as margin,
+                                   coalesce(release.day, refund.day, expired.day, profit.day)         as day,
+                                   coalesce(release.month, refund.month, expired.month, profit.month) as month,
+                                   coalesce(release.year, refund.year, expired.year, profit.year)     as year
+                            from profit_view profit
+                                     left join aggregated_release release
+                                               on release.day is not distinct from profit.day and
+                                                  release.month is not distinct from profit.month and
+                                                  release.year is not distinct from profit.year
+                                     left join aggregated_refund refund
+                                               on refund.day is not distinct from profit.day and
+                                                  refund.month is not distinct from profit.month and
+                                                  refund.year is not distinct from profit.year
+                                     left join expired_percent_view expired
+                                               on expired.day is not distinct from profit.day and
+                                                  expired.month is not distinct from profit.month and
+                                                  expired.year is not distinct from profit.year
+                            where release.sum is null
+                              and refund.sum is null
+                              and expired.expired_percent is null
+                        ) sub
+                   order by coalesce(day, month, year);
+                   """, resultSetMapping = "ReportRecord")
 
 @SqlResultSetMapping(
         name = "ReportRecord",
@@ -46,14 +127,11 @@ import java.time.LocalDateTime;
                 @ConstructorResult(
                         targetClass = ReportRecord.class,
                         columns = {
-                                @ColumnResult(name = "day", type = Integer.class),
-                                @ColumnResult(name = "month", type = Integer.class),
-                                @ColumnResult(name = "year", type = Integer.class),
-                                @ColumnResult(name = "totalRelease", type = Double.class),
-                                @ColumnResult(name = "totalRefund", type = Double.class),
-                                @ColumnResult(name = "expiredCreditsPercent", type = Double.class),
-                                @ColumnResult(name = "totalProfit", type = Double.class),
-                                @ColumnResult(name = "profitPlus", type = Double.class)
+                                @ColumnResult(name = "period", type = String.class),
+                                @ColumnResult(name = "release", type = Double.class),
+                                @ColumnResult(name = "refund", type = Double.class),
+                                @ColumnResult(name = "expired_percent", type = Double.class),
+                                @ColumnResult(name = "margin", type = Double.class),
                         }
                 )
         }
